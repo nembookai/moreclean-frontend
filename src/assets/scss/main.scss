@@ -1,0 +1,249 @@
+@import url('https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap');
+@tailwind base;
+@layer base {
+  img {
+    @apply inline-block;
+  }
+}
+@tailwind components;
+@tailwind utilities;
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* Import third party styles */
+@import "vuedatepicker.scss";
+@import "transitions";
+@import "vue3-colorpicker/style.css";
+
+/* Placeholder loader styles */
+.placeholder-loading {
+  position: relative;
+  overflow: hidden;
+  background-color: #f0f0f0;
+  border-radius: 20px;
+  width: 100%;
+  
+  &::after {
+    content: "";
+    animation-duration: 1s;
+    animation-fill-mode: forwards;
+    animation-iteration-count: infinite;
+    animation-name: placeholderShimmer;
+    animation-timing-function: linear;
+    background: linear-gradient(to right, #f0f0f0 8%, #e0e0e0 18%, #f0f0f0 33%);
+    background-size: 800px 104px;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+}
+
+@keyframes placeholderShimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: 200px 0;
+  }
+}
+
+
+*, html {
+  -webkit-print-color-adjust: exact;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  outline: none;
+}
+
+body {
+  background-color: #f5f7fb;
+  font-family: "Figtree", sans-serif;
+  font-optical-sizing: auto;
+  font-feature-settings: normal;
+  font-variation-settings: normal;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  @apply selection:bg-primary-600 selection:text-white;
+}
+
+.btn {
+  @apply bg-primary-600 flex items-center disabled:cursor-not-allowed disabled:bg-primary-600/60 disabled:hover:bg-primary-600/60 disabled:active:bg-primary-600/60 justify-center select-none gap-x-1.5 text-white px-[25px] py-2.5 rounded-[4px] text-[14.5px] hover-transition hover:bg-primary-700 active:bg-primary-800 active:translate-y-[-1.5px];
+
+  &__red {
+    @apply bg-red-500 hover:bg-red-400 active:bg-red-700 disabled:bg-red-500/60 disabled:hover:bg-red-500/60 disabled:active:bg-red-500/60;
+  }
+
+  &__lightgray {
+    @apply bg-gray-200 text-gray-800 hover:bg-gray-300 active:bg-gray-400 disabled:bg-gray-200/60 disabled:hover:bg-gray-200/60 disabled:active:bg-gray-200/60;
+  }
+
+  &__green {
+    @apply bg-green-500 hover:bg-green-600 active:bg-green-700 disabled:bg-green-500/60 disabled:hover:bg-green-500/60 disabled:active:bg-green-500/60;
+  }
+
+  &__gray {
+    @apply bg-gray-500 hover:bg-gray-400 active:bg-gray-700 disabled:bg-gray-500/60 disabled:hover:bg-gray-500/60 disabled:active:bg-gray-500/60;
+  }
+
+  &__small {
+    @apply px-[15px] py-[8px] text-[13.5px];
+  }
+
+  &__disabled {
+    @apply bg-gray-300 text-gray-500 cursor-not-allowed hover:bg-gray-300 active:translate-y-0 opacity-80;
+  }
+}
+
+.box {
+  @apply bg-white p-5 rounded-[9px] border shadow-sm border-gray-100 hover:border-gray-200 hover-transition;
+}
+
+.hover_dropdown {
+  @apply px-[12px] py-[12px] flex items-center gap-x-[10px] cursor-pointer hover:bg-primary-600 border-b border-[#f5f5f5] last:border-b-0 hover:text-white !duration-100 hover-transition;
+  
+  &__small {
+    @apply py-2.5 px-2;
+  }
+
+  &__red {
+    @apply text-red-500;
+  }
+
+  &__red:hover {
+    @apply hover:bg-red-500 hover:text-white;
+  }
+}
+
+.table-component {
+  td {
+    @apply first:pl-4 first:border-l-[1px] last:pr-4 px-2 py-[12.5px] text-[12.5px] font-light border-r-[1px] border-[#eceff0] text-slate-800;
+  }
+}
+
+.hover-transition {
+  @apply transition-all ease-in-out duration-300;
+}
+
+.content {
+  width: calc(95% - 215px);
+  min-width: calc(92% - 215px);
+  max-width: 1400px;
+  position: relative;
+  left: 100px;
+  margin: auto;
+}
+
+.bigger-content {
+  width: calc(95% - 80px);
+  min-width: calc(92% - 80px);
+  max-width: 1400px;
+  position: relative;
+  left: 40px;
+  margin: auto;
+}
+
+.blackBackgroundFixed {
+  scrollbar-gutter: stable;
+  @apply fixed w-[100vw] h-[100vh] bg-black/30 flex items-start overflow-auto justify-center top-0 left-0 z-[1000];
+  @supports (height: 100dvh) {
+    @apply h-[100dvh] w-[100dvw];
+  }
+}
+
+.input {
+  @apply w-full text-[14px] mt-1 font-normal px-2.5 py-2 rounded-[6px] bg-white border border-[#dfe0e5] leading-[22px] focus:border-[#a9aaaf] focus:shadow-sm hover:border-[#bdbec3] text-primary-950 shadow-inner shadow-gray-50 transition-[background-color,box-shadow,border] ease-out duration-100 appearance-none;
+  &__primary {
+    @apply focus:border-primary-500 focus:bg-[#fbfeff];
+  }
+  &__error {
+    @apply border-red-500 text-red-600 focus:text-primary-950 bg-red-50;
+  }
+  &__small {
+    @apply text-[14px] py-[7px] px-2;
+  }
+  &__disabled {
+    @apply bg-gray-100 text-gray-700 cursor-not-allowed;
+  }
+}
+
+.vti__dropdown {
+  @apply hover:rounded-l-[6px];
+}
+
+.vti__input {
+  @apply rounded-[6px] #{!important};
+}
+
+.vue-tel-input {
+  @apply border border-[#dfe0e5] shadow-sm focus:border-[#a9aaaf] text-[14px] focus:shadow-sm rounded-[6px] focus-within:border-gray-800 focus-within:border-opacity-40 px-0 py-0 #{!important};
+}
+
+.loader {
+  width: 65px;
+  aspect-ratio: 1;
+  position: relative;
+}
+.loader:before,
+.loader:after {
+  content: "";
+  position: absolute;
+  border-radius: 50px;
+  background-color: #074e73;
+  box-shadow: 0 0 0 3px inset #074e73;
+  animation: l5 2.5s infinite;
+}
+.loader:after {
+  animation-delay: -1.25s;
+  border-radius: 0;
+}
+.loader-mini {
+  width: 30px;
+  aspect-ratio: 1;
+  position: relative;
+}
+.loader-mini:before,
+.loader-mini:after {
+  content: "";
+  position: absolute;
+  border-radius: 25px;
+  background-color: #074e73;
+  box-shadow: 0 0 0 2px inset #074e73;
+  animation: l5-mini 2.5s infinite;
+}
+.loader-mini:after {
+  animation-delay: -1.25s;
+  border-radius: 0;
+}
+@keyframes l5{
+  0%    {inset:0    35px 35px 0   }
+  12.5% {inset:0    35px 0    0   }
+  25%   {inset:35px 35px 0    0   }
+  37.5% {inset:35px 0    0    0   }
+  50%   {inset:35px 0    0    35px}
+  62.5% {inset:0    0    0    35px}
+  75%   {inset:0    0    35px 35px}
+  87.5% {inset:0    0    35px 0   }
+  100%  {inset:0    35px 35px 0   }
+}
+@keyframes l5-mini{
+  0%    {inset:0    15px 15px 0   }
+  12.5% {inset:0    15px 0    0   }
+  25%   {inset:15px 15px 0    0   }
+  37.5% {inset:15px 0    0    0   }
+  50%   {inset:15px 0    0    15px}
+  62.5% {inset:0    0    0    15px}
+  75%   {inset:0    0    15px 15px}
+  87.5% {inset:0    0    15px 0   }
+  100%  {inset:0    15px 15px 0   }
+}
