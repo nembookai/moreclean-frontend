@@ -1,10 +1,11 @@
 <template>
-  <div class="options-class" v-click-outside="() => isOpen = false" :class="{ 'bg-gray-200 !items-start !py-3 !cursor-auto active:!bg-gray-200': isOpen }" @click="openCustomer">
+  <div class="options-class" v-click-outside="() => isOpen = false" :class="[{ 'bg-gray-200 !items-start !py-3 !cursor-auto active:!bg-gray-200': isOpen }, { '!cursor-not-allowed active:!bg-gray-200': loading }]" @click="openCustomer">
     <PhUser :size="27" weight="regular" class="text-gray-600" />
     <div class="text-gray-700 text-[13px] leading-[15px]" v-show="!isOpen">
-      <div v-if="!customer">Ingen kunde valgt</div>
-      <div class="text-gray-700 text-[14px]" v-if="customer?.number">({{ customer.number }}) {{ customer?.name}}</div>
-      <div class="text-gray-500 text-[12px] font-light" v-if="!customer">Vælg kunde for opgaven</div>
+      <div v-if="!customer && !loading">Ingen kunde valgt</div>
+      <div v-if="customer && !loading" class="text-gray-700 text-[14px]">({{ customer.number }}) {{ customer?.name }}</div>
+      <div v-if="!customer && loading" class="flex items-center gap-x-1 select-none"><PhSpinner :size="16" weight="bold" class="animate-spin" /> Indlæser kunder...</div>
+      <div class="text-gray-500 text-[12px] font-light select-none" v-if="!customer">Vælg kunde for opgaven</div>
       <div class="text-gray-500 text-[12px] font-light" v-else>
         <span v-if="customer.type === 'company' && customer.cvr">Cvr. {{ customer.cvr }}</span>
         <span v-if="customer.type === 'person' && customer.cvr">Cpr. {{ customer.cvr }}</span>
@@ -22,8 +23,8 @@
  * Imports
 ******************************/
 import { ref } from 'vue';
-import { PhUser, PhCaretUp } from '@phosphor-icons/vue';
-const props = defineProps(['allCustomers']);
+import { PhUser, PhCaretUp, PhSpinner } from '@phosphor-icons/vue';
+const props = defineProps(['allCustomers', 'loading']);
 const emit = defineEmits(['updateFromCustomer']);
 
 /******************************
@@ -42,7 +43,7 @@ const selectCustomer = (c) => {
 }
 
 const openCustomer = async () => {
-  if (!isOpen.value) {
+  if (!isOpen.value && !props.loading) {
     isOpen.value = true;
   }
 }

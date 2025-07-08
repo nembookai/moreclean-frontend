@@ -5,12 +5,12 @@
     </template>
     <template #content>
       <div class="grid grid-cols-6 gap-2.5">
-        <Task-Creation-Customer v-model:customer="newTask.customer" :allCustomers="customers" @updateFromCustomer="updateFromCustomer" />
-        <Task-Creation-Employees v-model:employees="newTask.employees" :allEmployees="employees" />
-        <Task-Creation-Products v-model:products="newTask.products" :allProducts="products" />
+        <Task-Creation-Customer v-model:customer="newTask.customer" :loading="loading.customers" :allCustomers="customers" @updateFromCustomer="updateFromCustomer" />
+        <Task-Creation-Employees v-model:employees="newTask.employees" :loading="loading.employees" :allEmployees="employees" />
+        <Task-Creation-Products v-model:products="newTask.products" :loading="loading.products" :allProducts="products" @updateFromProducts="updateFromProducts" />
         <Task-Creation-DatePicker v-model:date="newTask.date" v-model:startTime="newTask.start_time" v-model:endTime="newTask.end_time" v-model:endDate="newTask.end_date" v-model:allDay="newTask.all_day" />
         <Task-Creation-Location v-model:location="newTask.location" />
-        <Task-Creation-Economy v-model:economy="newTask.economy" />
+        <Task-Creation-Economy v-model:economy="newTask.economy" :start="newTask.start_time" :end="newTask.end_time" :all_day="newTask.all_day" :products="newTask.products" :employees="newTask.employees" :customer="newTask.customer" />
         <Task-Creation-ColorPicker v-model:color="newTask.color" />
         <div class="col-span-full mt-1">
           <div class="text-gray-600 text-[13px] mb-1">Beskrivelse</div>
@@ -50,16 +50,19 @@ const newTask = ref({
   color: taskColors[0],
   employees: [],
   products: [],
-  economy: {},
+  economy: {
+    hourly_price: 0,
+    fixed_price: 0,
+  },
 });
 const customers = ref([]);
 const employees = ref([]);
 const products = ref([]);
 const loading = ref({
   create: false,
-  customers: false,
-  employees: false,
-  products: false,
+  customers: true,
+  employees: true,
+  products: true,
 });
 const emit = defineEmits(['close', 'created']);
 const message = inject('message');
@@ -68,21 +71,17 @@ const message = inject('message');
  * Lifecycle hooks
 ******************************/
 onBeforeMount(async () => {
-  loading.value.customers = true;
-
   await axiosClient.get('customers?per_page=100000').then((response) => {
     customers.value = response.pageData?.data || [];
   }).catch((e) => { });
 
   loading.value.customers = false;
-  loading.value.employees = true;
 
   await axiosClient.get('employees?per_page=100000').then((response) => {
     employees.value = response.pageData?.data || [];
   }).catch((e) => { });
 
   loading.value.employees = false;
-  loading.value.products = true;
 
   await axiosClient.get('products?per_page=100000').then((response) => {
     products.value = response.pageData?.data || [];
@@ -136,6 +135,32 @@ const updateFromCustomer = (customer) => {
     newTask.value.color = customer.color;
   } else {
     newTask.value.color = taskColors[0];
+  }
+}
+
+const updateFromProducts = (products) => {
+  if (!newTask.value.economy.hourly_changed) {
+    newTask.value.economy.hourly_price = 0;
+  } else if (newTask.value.economy.hourly_price === 0) {
+    newTask.value.economy.hourly_changed = false;
+  }
+
+  if (!newTask.value.economy.fixed_changed) {
+    newTask.value.economy.fixed_price = 0;
+  } else if (newTask.value.economy.fixed_price === 0) {
+    newTask.value.economy.fixed_changed = false;
+  }
+
+  if (products.length > 0) {
+    products.forEach((product) => {
+      if (product.pricing_type === 'hourly' && !newTask.value.economy.hourly_changed) {
+        newTask.value.economy.hourly_price += product.price;
+      }
+
+      if (product.pricing_type === 'fixed' && !newTask.value.economy.fixed_changed) {
+        newTask.value.economy.fixed_price += product.price;
+      }
+    });
   }
 }
 </script>
