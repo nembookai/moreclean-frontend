@@ -9,6 +9,10 @@
     <DeletePrompt :msg="`Er du sikker på du vil slette kunden ${activeCustomer.name}?`" @delete="deleteCustomer" @close="deleteSure = null" />
   </ModalShow>
 
+  <ModalShow :condition="serviceAgreement">
+    <ServiceAgreement-Create @close="serviceAgreement = null" :products="products" :customer="serviceAgreement" @saved="saveServiceAgreement" @deleted="deleteServiceAgreement" />
+  </ModalShow>
+
   <div class="mt-5 box" v-if="!loading.loading">
     <TableComponent emptyMessage="Ingen kunder fundet" :lastRight="true" :headers="headers" :data="customerData">
       <template #extra>
@@ -59,6 +63,10 @@
                   <div><PhEye :size="16" weight="fill" /></div>
                   Se kunde
                 </div>
+                <div class="hover_dropdown hover_dropdown__small" @click="serviceAgreement = customer">
+                  <div><PhCalendar :size="16" weight="fill" /></div>
+                  Serviceaftale
+                </div>
                 <div class="hover_dropdown hover_dropdown__small" @click="openCreateCustomer = true;">
                   <div><PhPen :size="16" weight="fill" /></div>
                   Rediger kunde
@@ -82,7 +90,7 @@
 ******************************/
 import { ref, onBeforeMount, inject } from 'vue';
 import { axiosClient } from '@/lib/axiosClient'
-import { PhCaretDown, PhEye, PhPen, PhBackspace, PhPlus } from '@phosphor-icons/vue';
+import { PhCaretDown, PhEye, PhPen, PhBackspace, PhPlus, PhCalendar } from '@phosphor-icons/vue';
 
 /*******************************
 * Refs & variables
@@ -114,6 +122,8 @@ const activeCustomer = ref(null);
 const openCreateCustomer = ref(false);
 const lastCustomerNumber = ref(0);
 const deleteSure = ref(null);
+const serviceAgreement = ref(null);
+const products = ref(null);
 
 /*******************************
 * Lifecycle hooks
@@ -122,9 +132,12 @@ onBeforeMount(async () => {
   loading.load();
 
   await axiosClient.get('/customers').then((response) => {
-    console.log(response);
     customerData.value = response.pageData;
     lastCustomerNumber.value = response.lastCustomerNumber + 1;
+  }).catch((e) => { });
+
+  await axiosClient.get('/products?per_page=100000').then((response) => {
+    products.value = response.pageData?.data || [];
   }).catch((e) => { });
 
   loading.reset();
@@ -162,5 +175,17 @@ const deleteCustomer = async () => {
     deleteSure.value = null;
     message.showComplete('Kunden er blevet slettet');
   }).catch((e) => { });
+};
+
+const saveServiceAgreement = (sa) => {
+  const index = customerData.value.data.findIndex(c => c.id === sa.customer_id);
+  customerData.value.data[index].service_agreement = sa;
+  serviceAgreement.value = null;
+};
+
+const deleteServiceAgreement = () => {
+  const index = customerData.value.data.findIndex(c => c.id === serviceAgreement.value.id);
+  customerData.value.data[index].service_agreement = null;
+  serviceAgreement.value = null;
 };
 </script>
