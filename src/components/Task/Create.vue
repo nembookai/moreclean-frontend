@@ -5,12 +5,12 @@
     </template>
     <template #content>
       <div class="grid grid-cols-6 gap-2.5">
-        <Task-Creation-Customer v-model:customer="newTask.customer" :loading="loading.customers" :allCustomers="customers" @updateFromCustomer="updateFromCustomer" />
+        <Task-Creation-Customer v-model:customer="newTask.customer" :loading="loading.customers" :allCustomers="customers" @updateFromCustomer="updateFromCustomer" @removeServiceAgreement="removeServiceAgreement" />
         <Task-Creation-Employees v-model:employees="newTask.employees" :loading="loading.employees" :allEmployees="employees" />
         <Task-Creation-Products v-model:products="newTask.products" :loading="loading.products" :allProducts="products" @updateFromProducts="updateFromProducts" />
         <Task-Creation-DatePicker v-model:date="newTask.date" v-model:startTime="newTask.start_time" v-model:endTime="newTask.end_time" v-model:endDate="newTask.end_date" v-model:allDay="newTask.all_day" />
         <Task-Creation-Location v-model:location="newTask.location" />
-        <Task-Creation-Economy v-model:economy="newTask.economy" :start="newTask.start_time" :end="newTask.end_time" :all_day="newTask.all_day" :products="newTask.products" :employees="newTask.employees" :customer="newTask.customer" />
+        <Task-Creation-Economy v-if="!newTask.service_agreement_id" v-model:economy="newTask.economy" :start="newTask.start_time" :end="newTask.end_time" :all_day="newTask.all_day" :products="newTask.products" :employees="newTask.employees" :customer="newTask.customer" />
         <Task-Creation-ColorPicker v-model:color="newTask.color" />
         <div class="col-span-full mt-1">
           <div class="text-gray-600 text-[13px] mb-1">Beskrivelse</div>
@@ -54,6 +54,7 @@ const newTask = ref({
     hourly_price: 0,
     fixed_price: 0,
   },
+  service_agreement_id: null,
 });
 const customers = ref([]);
 const employees = ref([]);
@@ -136,6 +137,14 @@ const updateFromCustomer = (customer) => {
   } else {
     newTask.value.color = taskColors[0];
   }
+
+  if (customer.service_agreement) {
+    newTask.value.service_agreement_id = customer.service_agreement.id;
+  } 
+}
+
+const removeServiceAgreement = () => {
+  newTask.value.service_agreement_id = null;
 }
 
 const updateFromProducts = (products) => {
