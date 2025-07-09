@@ -95,11 +95,27 @@ onBeforeMount(async () => {
  * Methods
 ******************************/
 const createTask = async () => {
-  loading.value.create = true;
-
-  if (!newTask.value.title) {
-    newTask.value.title = 'Ingen titel';
+  if (!newTask.value.customer) {
+    message.showError('Du skal vælge en kunde');
+    return;
   }
+
+  if (!newTask.value.employees?.length) {
+    message.showError('Du skal vælge mindst én medarbejder');
+    return;
+  }
+
+  if (!newTask.value.products?.length) {
+    message.showError('Du skal vælge mindst ét produkt');
+    return;
+  }
+
+  if (!newTask.value.location) {
+    message.showError('Du skal vælge en lokation');
+    return;
+  }
+  
+  loading.value.create = true;
 
   if (!newTask.value.date) {
     newTask.value.date = moment().format('YYYY-MM-DD');
@@ -108,7 +124,8 @@ const createTask = async () => {
   await axiosClient.post('task', {
     ...newTask.value,
     start_time: newTask.value.start_time.value,
-    end_time: newTask.value.end_time.value
+    end_time: newTask.value.end_time.value,
+    customer_id: newTask.value.customer?.id,
   }).then((response) => {
     message.showComplete('Opgaven er oprettet');
     emit('created', response.task);

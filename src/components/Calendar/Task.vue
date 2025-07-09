@@ -7,11 +7,6 @@
         <span>{{ task.title }}</span>
         <span v-if="task.overlapping && calendar.activeView === 4" class="ml-1">(n)</span>
       </div>
-      <div v-if="showTime && !showMultiDay" class="font-light drop-shadow-sm">{{ printTaskTime(task) }}</div>
-      <template v-if="showMultiDay">
-        <div class="font-light drop-shadow-sm" v-if="task.date !== task.end_date">{{ moment(task.date).format('DD. MMM') }} - {{ moment(task.end_date).format('DD. MMM') }}</div>
-        <div class="font-light drop-shadow-sm" v-if="task.date === task.end_date">Hele dagen</div>
-      </template>
     </div>
     <div v-if="allowResize && (!task.overlapping && !task.overlaps) && !task.all_day" class="resize-handle absolute bottom-0 left-0 right-0 h-1.5 cursor-s-resize" @mousedown.stop="startResize(task, $event)"></div>
     <div v-if="showTooltip" class="absolute top-[40px] pointer-events-none -translate-y-1/2 !text-[9px] py-0.5 px-3 rounded-full bg-gray-700 text-white opacity-0 hover-transition group-hover:opacity-100 z-[21] hover-transition text-nowrap delay-0 group-hover:delay-[2000ms]" :class="dayIndex && dayIndex > 3 ? 'right-0' : 'left-0'">
@@ -117,7 +112,8 @@ function stopResize() {
   window.removeEventListener('mousemove', resizeTask);
   window.removeEventListener('mouseup', stopResize);
 
-  tasks.updateTaskBackend(props.task, () => {
+  tasks.updateTaskBackend(props.task, (task) => {
+    props.task.title = task.title;
     message.showComplete('Opgaven er rykket');
   });
 }
@@ -159,7 +155,8 @@ function stopResizeTop() {
   window.removeEventListener('mousemove', resizeTaskTop);
   window.removeEventListener('mouseup', stopResizeTop);
 
-  tasks.updateTaskBackend(props.task, () => {
+  tasks.updateTaskBackend(props.task, (task) => {
+    props.task.title = task.title;
     message.showComplete('Opgaven er rykket');
   });
 }
