@@ -1,6 +1,6 @@
 <template>
   <div class="box !bg-transparent !border-gray-100 !shadow-none !rounded-none !p-0">
-    <div class="w-full flex items-center justify-center bg-primary-500 text-white text-center border-r border-primary-400 p-2 border-b">
+    <div class="w-full flex items-center justify-center bg-primary-500 text-white text-center border-r border-primary-400 p-2 border-b sticky top-[52px] z-[14]">
       <div class="text-[15px] py-[3px] font-medium drop-shadow">{{ calendar.activeDate.format('MMMM YYYY') }}</div>
     </div>
     <div class="grid grid-cols-7">
