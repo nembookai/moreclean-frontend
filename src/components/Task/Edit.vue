@@ -1,7 +1,7 @@
 <template>
   <div>    
     <div class="grid grid-cols-6 gap-2">
-      <Task-Creation-Customer v-model:customer="newTask.customer" :prefillServiceAgreement="newTask.service_agreement" :loading="loading.customers" :allCustomers="customers" @updateFromCustomer="updateFromCustomer" @removeServiceAgreement="removeServiceAgreement" />
+      <Task-Creation-Customer v-model:customer="newTask.customer" :lastCustomerNumber="lastCustomerNumber" :prefillServiceAgreement="newTask.service_agreement" :loading="loading.customers" :allCustomers="customers" @updateFromCustomer="updateFromCustomer" @removeServiceAgreement="removeServiceAgreement" />
       <Task-Creation-Employees v-model:employees="newTask.employees" :loading="loading.employees" :allEmployees="employees" />
       <Task-Creation-Products v-model:products="newTask.products" :loading="loading.products" :allProducts="products" @updateFromProducts="updateFromProducts" />
       <Task-Creation-DatePicker v-model:date="newTask.date" v-model:startTime="newTask.start_time" v-model:endTime="newTask.end_time" v-model:endDate="newTask.end_date" v-model:allDay="newTask.all_day" />
@@ -38,6 +38,7 @@ const emit = defineEmits(['close', 'updated']);
 const customers = ref([]);
 const employees = ref([]);
 const products = ref([]);
+const lastCustomerNumber = ref(0);
 const loading = ref({
   edit: false,
   customers: true,
@@ -156,6 +157,7 @@ const updateFromProducts = (products) => {
 onBeforeMount(async () => {
   await axiosClient.get('customers?per_page=100000').then((response) => {
     customers.value = response.pageData?.data || [];
+    lastCustomerNumber.value = response.lastCustomerNumber;
   }).catch((e) => { });
 
   loading.value.customers = false;

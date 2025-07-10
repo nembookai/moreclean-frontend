@@ -5,7 +5,7 @@
     </template>
     <template #content>
       <div class="grid grid-cols-6 gap-2.5">
-        <Task-Creation-Customer v-model:customer="newTask.customer" :loading="loading.customers" :allCustomers="customers" @updateFromCustomer="updateFromCustomer" @removeServiceAgreement="removeServiceAgreement" />
+        <Task-Creation-Customer v-model:customer="newTask.customer" :lastCustomerNumber="lastCustomerNumber" :loading="loading.customers" :allCustomers="customers" @updateFromCustomer="updateFromCustomer" @removeServiceAgreement="removeServiceAgreement" />
         <Task-Creation-Employees v-model:employees="newTask.employees" :loading="loading.employees" :allEmployees="employees" />
         <Task-Creation-Products v-model:products="newTask.products" :loading="loading.products" :allProducts="products" @updateFromProducts="updateFromProducts" />
         <Task-Creation-DatePicker v-model:date="newTask.date" v-model:startTime="newTask.start_time" v-model:endTime="newTask.end_time" v-model:endDate="newTask.end_date" v-model:allDay="newTask.all_day" />
@@ -59,6 +59,7 @@ const newTask = ref({
 const customers = ref([]);
 const employees = ref([]);
 const products = ref([]);
+const lastCustomerNumber = ref(0);
 const loading = ref({
   create: false,
   customers: true,
@@ -73,6 +74,7 @@ const message = inject('message');
 ******************************/
 onBeforeMount(async () => {
   await axiosClient.get('customers?per_page=100000').then((response) => {
+    lastCustomerNumber.value = response.lastCustomerNumber
     customers.value = response.pageData?.data || [];
   }).catch((e) => { });
 

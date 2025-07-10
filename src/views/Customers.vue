@@ -133,7 +133,7 @@ onBeforeMount(async () => {
 
   await axiosClient.get('/customers').then((response) => {
     customerData.value = response.pageData;
-    lastCustomerNumber.value = response.lastCustomerNumber + 1;
+    lastCustomerNumber.value = response.lastCustomerNumber;
   }).catch((e) => { });
 
   await axiosClient.get('/products?per_page=100000').then((response) => {
