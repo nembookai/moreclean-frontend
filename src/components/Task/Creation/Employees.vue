@@ -19,7 +19,16 @@
       <div class="text-gray-700 text-[13px] leading-[15px] w-full relative" v-if="isOpen">
         <PhCaretUp :size="16" weight="bold" class="absolute right-[10px] top-[-3px] cursor-pointer hover-transition hover:text-primary-600 active:text-primary-800 select-none" @click.stop="isOpen = false" />
         <div class="text-gray-700 text-[13px] font-medium leading-[15px]">Tilføj medarbejder</div>
-        <DropdownWrite fillPlaceholder="Vælg medarbejder" :multiple="true" :values="allEmployees" :chosenValue="employees" @selectValue="(e) => employees = e" display="name" dropdownWidth="w-[500px]" :filterable="['name']" />
+        <DropdownWrite fillPlaceholder="Vælg medarbejder" :values="employeesDropdown" :chosenValue="employees" @selectValue="updateEmployees" display="name" dropdownWidth="w-[500px]" :filterable="['name']" />
+        <div class="mt-2" v-if="employees.length">
+          <div class="text-gray-500 text-[12px] font-light">Medarbejdere valgt</div>
+          <div class="flex flex-col gap-1.5">
+            <div class="text-gray-700 text-[14px] leading-[15px] flex items-center gap-x-1" v-for="(e, index) in employees" :key="e.id">
+              {{ e.name }}
+              <PhX :size="16" weight="regular" class="text-red-500 cursor-pointer hover-transition hover:text-red-700 active:text-red-900" @click.stop="removeEmployee(e)" />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -28,8 +37,8 @@
 /******************************
  * Imports
 ******************************/
-import { ref } from 'vue';
-import { PhIdentificationBadge, PhCaretUp, PhSpinner } from '@phosphor-icons/vue';
+import { ref, computed } from 'vue';
+import { PhIdentificationBadge, PhCaretUp, PhSpinner, PhX } from '@phosphor-icons/vue';
 const props = defineProps(['allEmployees', 'loading']);
 
 /******************************
@@ -39,11 +48,26 @@ const employees = defineModel('employees');
 const isOpen = ref(false);
 
 /******************************
- * Methods
+ * Methods & computed
 ******************************/
 const openEmployee = async () => {
   if (!isOpen.value && !props.loading) {
     isOpen.value = true;
   }
 }
+
+const updateEmployees = (e) => {
+  employees.value.push(e);
+}
+
+const removeEmployee = (e) => {
+  const index = employees.value.findIndex(employee => employee.id === e.id);
+  if (index > -1) {
+    employees.value.splice(index, 1);
+  }
+}
+
+const employeesDropdown = computed(() => {
+  return props.allEmployees.filter(employee => !employees.value.some(e => e.id === employee.id));
+});
 </script>
