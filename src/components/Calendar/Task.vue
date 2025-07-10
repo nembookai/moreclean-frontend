@@ -59,106 +59,112 @@ const message = inject('message');
 const calendar = Calendar();
 
 let resizingTop = false;
-let originalStart = null;
 let resizing = false;
 let originalY = 0;
+let originalStart = null;
 let originalEnd = null;
+let hasMovedEnough = false;
+const minResizeDistance = 15;
 
 /******************************
  * Computed & Methods
 ******************************/
-function printTaskTime(task) {
-  if (task.overlaps) {
-    return '(f) ' + task.original_task.start_time + ' - ' + task.original_task.end_time;
-  }
-
-  return task.start_time + ' - ' + task.end_time + (task.overlapping ? ' (n)' : '');
-}
-
 function startResize(task, event) {
   resizing = true;
+  hasMovedEnough = false;
   originalY = event.clientY;
   originalEnd = moment(`${task.date} ${task.end_time}`, 'YYYY-MM-DD HH:mm');
 
-  window.addEventListener('mousemove', (e) => resizeTask(task, e));
-  window.addEventListener('mouseup', stopResize);
+  const resizeHandler = (e) => resizeTask(task, e);
+  const stopHandler = () => stopResize(resizeHandler, stopHandler, task);
+
+  window.addEventListener('mousemove', resizeHandler);
+  window.addEventListener('mouseup', stopHandler);
 }
 
 function resizeTask(task, event) {
   if (!resizing) return;
 
   const deltaY = event.clientY - originalY;
-  const pixelsPer30Min = 24.5; // adjust to match your UI scale
-  const durationStep = 30; // in minutes
+
+  if (!hasMovedEnough && Math.abs(deltaY) < minResizeDistance) return;
+  hasMovedEnough = true;
+
+  const pixelsPer30Min = 24.5;
+  const durationStep = 30;
 
   const steps = Math.round(deltaY / pixelsPer30Min);
   const start = moment(`${task.date} ${task.start_time}`, 'YYYY-MM-DD HH:mm');
   const proposedEnd = originalEnd.clone().add(steps * durationStep, 'minutes');
-
   const endOfDay = moment(`${task.date} 23:59`, 'YYYY-MM-DD HH:mm');
 
-  // Prevent end time from going past midnight
   if (proposedEnd.isAfter(endOfDay)) return;
-
-  // Ensure end stays after start
   if (proposedEnd.isAfter(start)) {
     task.end_time = proposedEnd.format('HH:mm');
     task.duration = proposedEnd.diff(start, 'minutes');
   }
 }
 
-function stopResize() {
+function stopResize(resizeHandler, stopHandler, task) {
   resizing = false;
-  window.removeEventListener('mousemove', resizeTask);
-  window.removeEventListener('mouseup', stopResize);
+  window.removeEventListener('mousemove', resizeHandler);
+  window.removeEventListener('mouseup', stopHandler);
 
-  tasks.updateTaskBackend(props.task, (task) => {
-    props.task.title = task.title;
-    message.showComplete('Opgaven er rykket');
-  });
+  if (hasMovedEnough) {
+    tasks.updateTaskBackend(task, (updatedTask) => {
+      task.title = updatedTask.title;
+      message.showComplete('Opgaven er rykket');
+    });
+  }
 }
 
 function startResizeTop(task, event) {
   resizingTop = true;
+  hasMovedEnough = false;
   originalY = event.clientY;
   originalStart = moment(`${task.date} ${task.start_time}`, 'YYYY-MM-DD HH:mm');
 
-  window.addEventListener('mousemove', (e) => resizeTaskTop(task, e));
-  window.addEventListener('mouseup', stopResizeTop);
+  const resizeHandler = (e) => resizeTaskTop(task, e);
+  const stopHandler = () => stopResizeTop(resizeHandler, stopHandler, task);
+
+  window.addEventListener('mousemove', resizeHandler);
+  window.addEventListener('mouseup', stopHandler);
 }
 
 function resizeTaskTop(task, event) {
   if (!resizingTop) return;
 
   const deltaY = event.clientY - originalY;
+
+  if (!hasMovedEnough && Math.abs(deltaY) < minResizeDistance) return;
+  hasMovedEnough = true;
+
   const pixelsPer30Min = 24.5;
   const durationStep = 30;
 
   const steps = Math.round(deltaY / pixelsPer30Min);
   const proposedStart = originalStart.clone().add(steps * durationStep, 'minutes');
-
   const end = moment(`${task.date} ${task.end_time}`, 'YYYY-MM-DD HH:mm');
   const minStart = moment(`${task.date} 00:00`, 'YYYY-MM-DD HH:mm');
 
-  // Prevent resizing above 00:30
   if (proposedStart.isBefore(minStart)) return;
-
-  // Ensure start is before end
   if (proposedStart.isBefore(end)) {
     task.start_time = proposedStart.format('HH:mm');
     task.duration = end.diff(proposedStart, 'minutes');
   }
 }
 
-function stopResizeTop() {
+function stopResizeTop(resizeHandler, stopHandler, task) {
   resizingTop = false;
-  window.removeEventListener('mousemove', resizeTaskTop);
-  window.removeEventListener('mouseup', stopResizeTop);
+  window.removeEventListener('mousemove', resizeHandler);
+  window.removeEventListener('mouseup', stopHandler);
 
-  tasks.updateTaskBackend(props.task, (task) => {
-    props.task.title = task.title;
-    message.showComplete('Opgaven er rykket');
-  });
+  if (hasMovedEnough) {
+    tasks.updateTaskBackend(task, (updatedTask) => {
+      task.title = updatedTask.title;
+      message.showComplete('Opgaven er rykket');
+    });
+  }
 }
 </script>
 <style scoped>

@@ -10,10 +10,46 @@
         <PhX :size="30" weight="bold" class="p-1 w-[30px] hover:opacity-80 cursor-pointer hover-transition" @click.stop="closeModal" />
       </div>
       <template v-if="!showEditTask">
-        <div class="p-5 flex flex-col gap-y-[25px]">
-          <div class="flex gap-x-4">
+        <div class="p-5 flex flex-col gap-y-[20px]">
+          <div class="flex gap-x-3">
             <div>
-              <PhClock :size="20" weight="bold" class="text-gray-600" />
+              <PhUser :size="24" weight="regular" class="text-gray-500" />
+            </div>
+            <div>
+              <div class="text-gray-700 text-[15px] font-semibold leading-[15px]">Kunde</div>
+              <div class="text-gray-800 text-[14px] font-light flex items-center gap-x-1 mt-1"><span>({{ tasks.activeTask.customer?.number }})</span>{{ tasks.activeTask.customer?.name }}</div>
+              <div v-if="tasks.activeTask.service_agreement" class="bg-primary-500 text-white text-[12px] font-normal px-2 py-[3px] leading-none rounded-full mt-1">Serviceaftale: {{ tasks.activeTask.service_agreement?.name }}</div>
+            </div>
+          </div>
+          <div class="flex gap-x-3">
+            <div>
+              <PhIdentificationBadge :size="24" weight="regular" class="text-gray-500" />
+            </div>
+            <div>
+              <div class="text-gray-700 text-[15px] font-semibold leading-[15px]">Medarbejdere</div>
+              <div class="text-gray-800 text-[14px] font-light mt-1">
+                <div v-for="employee in tasks.activeTask.employees" :key="employee.id">
+                  <span>{{ employee.name }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="flex gap-x-3">
+            <div>
+              <PhPackage :size="24" weight="regular" class="text-gray-500" />
+            </div>
+            <div>
+              <div class="text-gray-700 text-[15px] font-semibold leading-[15px]">Produkter</div>
+              <div class="text-gray-800 text-[14px] font-light mt-1">
+                <div v-for="product in tasks.activeTask.products" :key="product.id">
+                  <span>{{ product.name }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="flex gap-x-3">
+            <div>
+              <PhClock :size="24" weight="regular" class="text-gray-500" />
             </div>
             <div>
               <div class="text-gray-700 text-[15px] font-semibold leading-[15px]">Dato & tidspunkt</div>
@@ -25,18 +61,46 @@
               </div>
             </div>
           </div>
-          <div class="flex gap-x-4">
+          <div class="flex gap-x-3">
             <div>
-              <PhMapPin :size="20" weight="bold" class="text-gray-600" />
+              <PhMapPin :size="24" weight="regular" class="text-gray-500" />
             </div>
             <div>
               <div class="text-gray-800 text-[15px] font-semibold leading-[15px]">Lokation</div>
               <div class="text-gray-800 text-[14px] font-light mt-1">{{ tasks.activeTask.location || 'Ingen lokation tilføjet' }}</div>
             </div>
           </div>
-          <div class="flex gap-x-4 bg-gray-200 -m-2 p-2 rounded-[8px]">
+          <div class="flex gap-x-3 mb-1" :class="{ 'items-center !mb-2': !showEconomy }" v-if="!tasks.activeTask.service_agreement">
             <div>
-              <PhChatText :size="20" weight="bold" class="text-gray-600" />
+              <PhCoins :size="24" weight="regular" class="text-gray-500" />
+            </div>
+            <div>
+              <div class="flex items-center gap-x-1 cursor-pointer hover:bg-gray-200 rounded-[4px] p-1 hover-transition active:bg-gray-300 active:translate-y-[-1.5px]" @click="showEconomy = !showEconomy">
+                <div class="text-gray-800 text-[15px] font-semibold leading-[15px]">Økonomi</div>
+                <PhCaretDown :size="16" weight="bold" class="text-gray-800 hover-transition" :class="{ 'rotate-180': showEconomy }" />
+              </div>
+              <div class="text-gray-600 text-[14px] font-light mt-1 flex flex-col gap-y-1" v-if="showEconomy">
+                <div>
+                  <span class="font-normal">Pris per time:</span> {{ formatPrice(tasks.activeTask.economy?.hourly_price) }} kr.
+                </div>
+                <div>
+                  <span class="font-normal">Fast pris:</span> {{ formatPrice(tasks.activeTask.economy?.fixed_price) }} kr.
+                </div>
+                <div>
+                  <span class="font-normal">Lønninger:</span> {{ formatPrice(expenses) }} kr.
+                </div>
+                <div>
+                  <span class="font-normal">Indtjening:</span> {{ formatPrice(earnings) }} kr.
+                </div>
+                <div :class="[earnings - expenses > 0 ? 'text-green-600' : 'text-red-600']">
+                  <span class="font-normal">Resultat:</span> {{ formatPrice(earnings - expenses) }} kr.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="flex gap-x-3 bg-gray-200 -m-2 p-2 rounded-[8px]">
+            <div>
+              <PhChatText :size="24" weight="regular" class="text-gray-500" />
             </div>
             <div>
               <div class="text-gray-700 text-[15px] font-semibold leading-[15px] mb-1.5">Beskrivelse</div>
@@ -61,10 +125,11 @@
 /*******************************
  * Imports & props
 ******************************/
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
 import { textColorWhiteOrBlack } from '@/composables/globalHelper'
-import { PhChatText, PhClock, PhPencilSimple, PhMapPin, PhX } from '@phosphor-icons/vue';
+import { PhChatText, PhClock, PhPencilSimple, PhMapPin, PhX, PhUser, PhIdentificationBadge, PhPackage, PhCoins, PhCaretDown } from '@phosphor-icons/vue';
 import moment from 'moment';
+import { formatPrice } from '@/composables/Price';
 import { Tasks } from '@/store/tasks';
 
 /******************************
@@ -75,6 +140,7 @@ const emit = defineEmits(['close']);
 const modal = ref();
 const deleteTask = ref(false);
 const showEditTask = ref(false);
+const showEconomy = ref(false);
 
 /******************************
  * Methods & computed
@@ -92,6 +158,32 @@ function closeModal() {
     emit('close');
   }
 }
+
+const earnings = computed(() => {
+  const start = moment(tasks.activeTask.start_time, 'HH:mm');
+  const end = moment(tasks.activeTask.end_time, 'HH:mm');
+  const totalHours = moment.duration(end.diff(start)).asHours();
+
+  // Calculate the earnings
+  return ((totalHours * tasks.activeTask.economy.hourly_price) + tasks.activeTask.economy.fixed_price);
+});
+
+const expenses = computed(() => {
+  let total = 0;
+  const start = moment(tasks.activeTask.start_time, 'HH:mm');
+  const end = moment(tasks.activeTask.end_time, 'HH:mm');
+  const totalHours = moment.duration(end.diff(start)).asHours();
+
+  if (tasks.activeTask.employees.length) {
+    tasks.activeTask.employees.forEach((employee) => {
+      if (employee.payout_type === 'hourly') {
+        total += employee.payout_amount * totalHours;
+      }
+    });
+  }
+
+  return total;
+});
 
 /******************************
  * Lifecycle hooks

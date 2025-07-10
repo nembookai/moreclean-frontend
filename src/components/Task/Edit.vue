@@ -1,12 +1,12 @@
 <template>
   <div>    
     <div class="grid grid-cols-6 gap-2">
-      <div class="col-span-full mb-1">
-        <label for="title" class="text-gray-600 text-[13px]">Titel <span class="text-red-500">*</span></label>
-        <input type="text" id="title" v-model="newTask.title" class="input" autocomplete="new-password" placeholder="Tilføj titel" />
-      </div>
+      <Task-Creation-Customer v-model:customer="newTask.customer" :prefillServiceAgreement="newTask.service_agreement" :loading="loading.customers" :allCustomers="customers" @updateFromCustomer="updateFromCustomer" @removeServiceAgreement="removeServiceAgreement" />
+      <Task-Creation-Employees v-model:employees="newTask.employees" :loading="loading.employees" :allEmployees="employees" />
+      <Task-Creation-Products v-model:products="newTask.products" :loading="loading.products" :allProducts="products" @updateFromProducts="updateFromProducts" />
       <Task-Creation-DatePicker v-model:date="newTask.date" v-model:startTime="newTask.start_time" v-model:endTime="newTask.end_time" v-model:endDate="newTask.end_date" v-model:allDay="newTask.all_day" />
       <Task-Creation-Location v-model:location="newTask.location" />
+      <Task-Creation-Economy v-if="!newTask.service_agreement_id" v-model:economy="newTask.economy" :start="newTask.start_time" :end="newTask.end_time" :all_day="newTask.all_day" :products="newTask.products" :employees="newTask.employees" :customer="newTask.customer" />
       <Task-Creation-ColorPicker v-model:color="newTask.color" />
       <div class="col-span-full mt-1">
         <div class="text-gray-600 text-[13px] mb-1">Beskrivelse</div>
@@ -15,8 +15,8 @@
     </div>
     <div class="flex items-center gap-x-5 mt-5 justify-end">
       <div class="text-gray-500 text-[15px] cursor-pointer underline underline-offset-2 font-light hover-transition hover:opacity-80 active:opacity-100 active:translate-y-[-1.5px]" @click="emit('close')">Annuller</div>
-      <button class="btn" :disabled="loading" @click="editTask">
-        <span v-if="!loading">Gem opgaven</span>
+      <button class="btn btn__green" :disabled="loading.edit" @click="editTask">
+        <span v-if="!loading.edit">Gem opgaven</span>
         <span v-else>Gemmer opgaven...</span>
       </button>
     </div>
@@ -26,7 +26,7 @@
 /*******************************
  * Imports & props
 ******************************/
-import { ref, inject } from 'vue';
+import { ref, inject, onBeforeMount } from 'vue';
 import { axiosClient } from '@/lib/axiosClient';
 const props = defineProps(['task']);
 
@@ -35,28 +35,46 @@ const props = defineProps(['task']);
 ******************************/
 const message = inject('message');
 const emit = defineEmits(['close', 'updated']);
-const loading = ref(false);
+const customers = ref([]);
+const employees = ref([]);
+const products = ref([]);
+const loading = ref({
+  edit: false,
+  customers: true,
+  employees: true,
+  products: true,
+});
 const newTask = ref({
-  title: props.task.title,
-  date: props.task.date,
+  ...props.task,
   start_time: props.task.start_time ? { value: props.task.start_time } : null,
   end_time: props.task.end_time ? { value: props.task.end_time } : null,
-  end_date: props.task.end_date,
-  all_day: props.task.all_day,
-  color: props.task.color,
-  location: props.task.location,
-  description: props.task.description,
 });
 
 /******************************
  * Methods
 ******************************/
 const editTask = async () => {
-  loading.value = true;
-
-  if (!newTask.value.title) {
-    newTask.value.title = 'Ingen titel';
+  if (!newTask.value.customer) {
+    message.showError('Du skal vælge en kunde');
+    return;
   }
+
+  if (!newTask.value.employees?.length) {
+    message.showError('Du skal vælge mindst én medarbejder');
+    return;
+  }
+
+  if (!newTask.value.products?.length) {
+    message.showError('Du skal vælge mindst ét produkt');
+    return;
+  }
+
+  if (!newTask.value.location) {
+    message.showError('Du skal vælge en lokation');
+    return;
+  }
+
+  loading.value.edit = true;
 
   if (!newTask.value.date) {
     newTask.value.date = moment().format('YYYY-MM-DD');
@@ -65,15 +83,95 @@ const editTask = async () => {
   await axiosClient.put(`task/${props.task.id}`, {
     ...newTask.value,
     start_time: newTask.value.start_time?.value || null,
-    end_time: newTask.value.end_time?.value || null
+    end_time: newTask.value.end_time?.value || null,
+    customer_id: newTask.value.customer?.id,
   }).then((response) => {
     message.showComplete('Opgaven er opdateret');
     emit('updated', response.task);
     emit('close');
   }).catch((error) => { });
 
-  loading.value = false;
+  loading.value.edit = false;
 }
+
+const updateFromCustomer = (customer) => {
+  if (customer.address) {
+    newTask.value.location = customer.address;
+  
+    if (customer.zip) {
+      newTask.value.location += ', ' + customer.zip;
+    }
+  
+    if (customer.city) {
+      newTask.value.location += ' ' + customer.city;
+    }
+  } else {
+    newTask.value.location = null;
+  }
+
+  if (customer.color) {
+    newTask.value.color = customer.color;
+  } else {
+    newTask.value.color = taskColors[0];
+  }
+
+  if (customer.service_agreement) {
+    newTask.value.service_agreement_id = customer.service_agreement.id;
+  } 
+}
+
+const removeServiceAgreement = () => {
+  newTask.value.service_agreement_id = null;
+}
+
+const updateFromProducts = (products) => {
+  if (!newTask.value.economy.hourly_changed) {
+    newTask.value.economy.hourly_price = 0;
+  } else if (newTask.value.economy.hourly_price === 0) {
+    newTask.value.economy.hourly_changed = false;
+  }
+
+  if (!newTask.value.economy.fixed_changed) {
+    newTask.value.economy.fixed_price = 0;
+  } else if (newTask.value.economy.fixed_price === 0) {
+    newTask.value.economy.fixed_changed = false;
+  }
+
+  if (products.length > 0) {
+    products.forEach((product) => {
+      if (product.pricing_type === 'hourly' && !newTask.value.economy.hourly_changed) {
+        newTask.value.economy.hourly_price += product.price;
+      }
+
+      if (product.pricing_type === 'fixed' && !newTask.value.economy.fixed_changed) {
+        newTask.value.economy.fixed_price += product.price;
+      }
+    });
+  }
+}
+
+/******************************
+ * Lifecycle hooks
+******************************/
+onBeforeMount(async () => {
+  await axiosClient.get('customers?per_page=100000').then((response) => {
+    customers.value = response.pageData?.data || [];
+  }).catch((e) => { });
+
+  loading.value.customers = false;
+
+  await axiosClient.get('employees?per_page=100000').then((response) => {
+    employees.value = response.pageData?.data || [];
+  }).catch((e) => { });
+
+  loading.value.employees = false;
+
+  await axiosClient.get('products?per_page=100000').then((response) => {
+    products.value = response.pageData?.data || [];
+  }).catch((e) => { });
+
+  loading.value.products = false;
+});
 </script>
 <style lang="scss" scoped>
 :deep(.ql-editor) {

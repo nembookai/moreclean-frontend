@@ -31,7 +31,7 @@
 ******************************/
 import { ref } from 'vue';
 import { PhUser, PhCaretUp, PhSpinner, PhX } from '@phosphor-icons/vue';
-const props = defineProps(['allCustomers', 'loading']);
+const props = defineProps(['prefillServiceAgreement', 'allCustomers', 'loading']);
 const emit = defineEmits(['updateFromCustomer', 'removeServiceAgreement']);
 
 /******************************
@@ -39,7 +39,7 @@ const emit = defineEmits(['updateFromCustomer', 'removeServiceAgreement']);
 ******************************/
 const customer = defineModel('customer');
 const isOpen = ref(false);
-const serviceAgreement = ref(null);
+const serviceAgreement = ref(props.prefillServiceAgreement || null);
 
 /******************************
  * Methods

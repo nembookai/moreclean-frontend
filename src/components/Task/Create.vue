@@ -18,7 +18,7 @@
         </div>
       </div>
       <div class="flex mt-5 justify-end">
-        <button class="btn" :disabled="loading.create" @click="createTask">
+        <button class="btn btn__green" :disabled="loading.create" @click="createTask">
           <span v-if="!loading.create">Gem opgave</span>
           <span v-else>Gemmer opgaven...</span>
         </button>
