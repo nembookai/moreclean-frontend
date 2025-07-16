@@ -1,15 +1,15 @@
 <template>
   <div class="text-[12px] flex flex-col h-full rounded shadow inner-shadow relative cursor-pointer group select-none hover-transition" :style="{ backgroundColor: task.color }" :class="[textColorWhiteOrBlack(task.color), { '!rounded-t-none': task.overlaps }, { '!rounded-b-none': task.overlapping }]">
-    <div v-if="allowResize && (!task.overlapping && !task.overlaps) && !task.all_day" class="resize-handle absolute top-0 left-0 right-0 h-1.5 z-[10] cursor-n-resize" @mousedown.stop="startResizeTop(task, $event)"></div>
+    <div v-if="allowResize && (!task.overlapping && !task.overlaps)" class="resize-handle absolute top-0 left-0 right-0 h-1.5 z-[10] cursor-n-resize" @mousedown.stop="startResizeTop(task, $event)"></div>
     <div class="group-hover:opacity-80 p-[3px] group-active:opacity-60 hover-transition flex-1 dragHandler hover-transition" @click="tasks.setActiveTask(task)">
-      <div class="line-clamp-1 font-normal drop-shadow-sm flex items-center">
+      <div class="font-normal drop-shadow-sm flex items-center">
         <span v-if="task.overlaps && calendar.activeView === 4" class="mr-1">(f)</span>
-        <span>{{ task.title }}</span>
+        <span :class="getLineClampClass()">{{ task.title }}</span>
         <span v-if="task.overlapping && calendar.activeView === 4" class="ml-1">(n)</span>
       </div>
     </div>
-    <div v-if="allowResize && (!task.overlapping && !task.overlaps) && !task.all_day" class="resize-handle absolute bottom-0 left-0 right-0 h-1.5 cursor-s-resize" @mousedown.stop="startResize(task, $event)"></div>
-    <div v-if="showTooltip" class="absolute top-[40px] pointer-events-none -translate-y-1/2 !text-[9px] py-0.5 px-3 rounded-full bg-gray-700 text-white opacity-0 hover-transition group-hover:opacity-100 z-[21] hover-transition text-nowrap delay-0 group-hover:delay-[2000ms]" :class="dayIndex && dayIndex > 3 ? 'right-0' : 'left-0'">
+    <div v-if="allowResize && (!task.overlapping && !task.overlaps)" class="resize-handle absolute bottom-0 left-0 right-0 h-1.5 cursor-s-resize" @mousedown.stop="startResize(task, $event)"></div>
+    <div v-if="showTooltip" class="absolute top-[40px] pointer-events-none -translate-y-1/2 !text-[9px] py-0.5 px-3 rounded-full bg-gray-700 text-white opacity-0 hover-transition group-hover:opacity-100 z-[21] hover-transition text-nowrap delay-0 group-hover:delay-[500ms]" :class="dayIndex && dayIndex > 3 ? 'right-0' : 'left-0'">
       <div>{{ task.title }}</div>
       <div>Varighed: {{ task.overlaps ? task.original_task.duration : task.duration }} minutter</div>
     </div>
@@ -40,10 +40,6 @@ const props = defineProps({
   showTime: {
     type: Boolean,
     default: true
-  },
-  showMultiDay: {
-    type: Boolean,
-    default: false
   },
   allowResize: {
     type: Boolean,
@@ -165,6 +161,26 @@ function stopResizeTop(resizeHandler, stopHandler, task) {
       message.showComplete('Opgaven er rykket');
     });
   }
+}
+
+function getLineClampClass() {
+  if (calendar.getTaskHeight(props.task) === 25) {
+    return 'line-clamp-1';
+  }
+
+  if (calendar.getTaskHeight(props.task) === 50) {
+    return 'line-clamp-2';
+  }
+
+  if (calendar.getTaskHeight(props.task) === 75) {
+    return 'line-clamp-3';
+  }
+
+  if (calendar.getTaskHeight(props.task) > 75) {
+    return 'line-clamp-4';
+  }
+
+  return 'line-clamp-1';
 }
 </script>
 <style scoped>

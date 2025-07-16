@@ -22,7 +22,7 @@
           <div class="bg-gray-300 absolute right-0 hover-transition group-hover:border border-gray-400 rounded-r-[7px] top-0 h-full w-10 flex items-center justify-center">kr.</div>
         </div>
       </div>
-      <template v-if="!all_day">
+      <template>
         <div class="flex items-center justify-between pr-10 mt-2">
           <div class="text-gray-600 text-[13px] text-nowrap">Lønninger</div>
           <div class="bg-gray-100 w-[200px] cursor-not-allowed h-[35px] flex items-center justify-start pl-2.5 rounded-[7px]">{{ formatPrice(expenses) }} kr.</div>
@@ -47,7 +47,7 @@ import { ref, computed } from 'vue';
 import { PhCoins, PhCaretUp } from '@phosphor-icons/vue';
 import { formatPrice } from '@/composables/Price';
 import moment from 'moment';
-const props = defineProps(['customer', 'products', 'employees', 'start', 'end', 'all_day']);
+const props = defineProps(['customer', 'products', 'employees', 'start', 'end']);
 
 /******************************
  * Refs & const

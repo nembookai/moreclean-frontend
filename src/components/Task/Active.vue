@@ -55,10 +55,9 @@
               <div class="text-gray-700 text-[15px] font-semibold leading-[15px]">Dato & tidspunkt</div>
               <div class="text-gray-800 text-[14px] font-light flex items-center gap-x-1 mt-1">
                 <div>{{ moment(tasks.activeTask.date).format('dddd, DD. MMM' + (moment(tasks.activeTask.date).year() !== moment().year() ? ' YYYY' : '')) }}</div>
-                <div class="text-gray-500 text-[14px] mx-1">&bull;</div>
-                <div v-if="!tasks.activeTask.all_day">{{ tasks.activeTask.start_time }} - {{ tasks.activeTask.end_time }}</div>
-                <div v-else>{{ moment(tasks.activeTask.end_date).format('dddd, DD. MMM' + (moment(tasks.activeTask.end_date).year() !== moment().year() ? ' YYYY' : '')) }}</div>
+                <div class="text-gray-500 text-[14px] mx-1">&bull; {{ tasks.activeTask.start_time }} - {{ tasks.activeTask.end_time }}</div>
               </div>
+              <div class="text-gray-800 font-light text-[14px]" v-if="tasks.activeTask?.recurring?.enabled">{{ tasks.activeTask.recurring.danish_text }}</div>
             </div>
           </div>
           <div class="flex gap-x-3">

@@ -8,9 +8,9 @@
         <Task-Creation-Customer v-model:customer="newTask.customer" :lastCustomerNumber="lastCustomerNumber" :loading="loading.customers" :allCustomers="customers" @updateFromCustomer="updateFromCustomer" @removeServiceAgreement="removeServiceAgreement" />
         <Task-Creation-Employees v-model:employees="newTask.employees" :loading="loading.employees" :allEmployees="employees" />
         <Task-Creation-Products v-model:products="newTask.products" :loading="loading.products" :allProducts="products" @updateFromProducts="updateFromProducts" />
-        <Task-Creation-DatePicker v-model:date="newTask.date" v-model:startTime="newTask.start_time" v-model:endTime="newTask.end_time" v-model:endDate="newTask.end_date" v-model:allDay="newTask.all_day" />
+        <Task-Creation-DatePicker v-model:recurring="newTask.recurring" v-model:date="newTask.date" v-model:startTime="newTask.start_time" v-model:endTime="newTask.end_time" />
         <Task-Creation-Location v-model:location="newTask.location" />
-        <Task-Creation-Economy v-if="!newTask.service_agreement_id" v-model:economy="newTask.economy" :start="newTask.start_time" :end="newTask.end_time" :all_day="newTask.all_day" :products="newTask.products" :employees="newTask.employees" :customer="newTask.customer" />
+        <Task-Creation-Economy v-if="!newTask.service_agreement_id" v-model:economy="newTask.economy" :start="newTask.start_time" :end="newTask.end_time" :products="newTask.products" :employees="newTask.employees" :customer="newTask.customer" />
         <Task-Creation-ColorPicker v-model:color="newTask.color" />
         <div class="col-span-full mt-1">
           <div class="text-gray-600 text-[13px] mb-1">Beskrivelse</div>
@@ -46,7 +46,6 @@ const newTask = ref({
   date: tasks.prefillTask.date || calendar.activeDate.clone().format('YYYY-MM-DD'),
   start_time: { value: tasks.prefillTask.start_time || moment().minutes(Math.round(moment().minutes() / 30) * 30).format('HH:mm') },
   end_time: { value: tasks.prefillTask.end_time || moment().minutes(Math.round(moment().minutes() / 30) * 30).add(1, 'hours').format('HH:mm') },
-  all_day: tasks.prefillTask.all_day || false,
   color: taskColors[0],
   employees: [],
   products: [],
@@ -55,6 +54,12 @@ const newTask = ref({
     fixed_price: 0,
   },
   service_agreement_id: null,
+  recurring: {
+    enabled: false,
+    interval: 1,
+    frequency: { value: 'DAILY', label: 'dag' },
+    weekly_days: [ moment(tasks.prefillTask.date).isoWeekday() - 1 ],
+  },
 });
 const customers = ref([]);
 const employees = ref([]);

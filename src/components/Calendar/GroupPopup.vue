@@ -5,7 +5,7 @@
       <div class="flex flex-col gap-y-2 p-2">
         <template v-for="task in group" :key="'card-' + task.id">
           <drag @dragstart="tasks.draggingTaskId = task.id" @dragend="tasks.draggingTaskId = null" :data="task" :go-back="true" mode="cut" type="card" @click.stop>
-            <Calendar-Task :task="task" :showMultiDay="!!task.end_date" :showTooltip="false" />
+            <Calendar-Task :task="task" :showTooltip="false" />
           </drag>
         </template>
       </div>

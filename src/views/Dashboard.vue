@@ -10,7 +10,6 @@
 
     <div class="overflow-y-auto max-h-[calc(100vh-50px)] mt-5 pr-3" ref="calendarContainer">
       <Calendar-Menu class="sticky top-0 z-[20]" @viewChanged="viewChanged" />
-      <Calendar-Views-Month class="flex-1" v-if="calendar.activeView === 4" @viewChanged="viewChanged" />
       <Calendar-Views-Week class="flex-1" v-if="calendar.activeView === 3" @viewChanged="viewChanged" />
       <Calendar-Views-Day class="flex-1" v-if="calendar.activeView === 2" />
       <Calendar-Views-List class="flex-1" :container="calendarContainer" v-if="calendar.activeView === 1" @viewChanged="viewChanged" />

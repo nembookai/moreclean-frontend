@@ -10,7 +10,8 @@
           <span>{{ moment(endDate).format('DD. MMMM YYYY') }}</span>
         </span>
       </div>
-      <div class="text-gray-500 text-[12px] font-light">Gentages ikke</div>
+      <div class="text-gray-500 text-[12px] font-light" v-if="!recurring.enabled">Gentages ikke</div>
+      <div class="text-gray-500 text-[12px] font-light" v-else>{{ recurring.danish_text }}</div>
     </div>
     <div class="flex-1 relative" v-else>
       <PhCaretUp :size="16" weight="bold" class="absolute right-[10px] top-[-3px] cursor-pointer hover-transition hover:text-primary-600 active:text-primary-800 select-none" @click.stop="isOpen = false" />
@@ -34,8 +35,44 @@
           <VueDatePicker locale="da" :format-locale="da" :min-date="date" text-input v-model="endDate" :clearable="false" :enable-time-picker="false" model-type="yyyy-MM-dd" :close-on-auto-apply="true" :auto-apply="true" format="dd. MMM yyyy" class="w-[160px]"></VueDatePicker>
         </template>
       </div>
-      <LayoutComponents-Toggle class="mt-3" v-model="allDay" @updated="allDayUpdated" text="Hele dagen" small />
-      <div class="text-gray-700 text-[13px] font-medium leading-[15px] mt-4 pb-2">Gentagelse <span class="text-primary-50 bg-primary-500 px-2 py-1 rounded-full font-bold ml-1 text-[12px]">Kommer snart</span></div>
+      <!-- <LayoutComponents-Toggle class="mt-3" v-model="allDay" @updated="allDayUpdated" text="Hele dagen" small /> -->
+      <LayoutComponents-Toggle class="mt-3" v-model="recurring.enabled" text="Gentagelse" small />
+      <div v-if="recurring.enabled" class="mt-3 text-sm">
+        <div class="text-sm text-gray-600">Gentag hver</div>
+        <div class="flex gap-2 items-center mt-[-2px]">
+          <input type="number" min="1" v-model="recurring.interval" class="input !w-[80px]" />            
+          <DropdownWrite :showArrowDropdown="false" :values="[
+            { value: 'DAILY', label: 'dag' },
+            { value: 'WEEKLY', label: 'uge' },
+            { value: 'MONTHLY', label: 'måned' },
+          ]" :chosenValue="recurring.frequency" :writeable="false" @selectValue="(value) => recurring.frequency = value" display="label" dropdownWidth="w-[150px]" overwriteInput="!w-[150px]" :filterable="['value']" />
+        </div>
+
+        <template v-if="recurring.frequency.value === 'WEEKLY' || recurring.frequency.value === 'MONTHLY'">
+          <div class="text-sm text-gray-600 mt-4">Gentag på</div>
+          <div v-if="recurring.frequency.value === 'WEEKLY'" class="flex gap-1">
+            <button v-for="(day, index) in daysOfWeek" :key="index" @click="toggleDay(index)" class="w-10 h-6 rounded-[5px]" :class="recurring.weekly_days.includes(index) ? 'bg-primary-600 text-white' : 'bg-gray-200 text-gray-600 hover:bg-primary-100'">
+              {{ day }}
+            </button>
+          </div>
+          <div class="pb-1.5 pt-1" v-if="recurring.frequency.value === 'MONTHLY'">
+            <div class="flex gap-3 items-center">
+              <label class="flex items-center gap-1">
+                <input type="radio" v-model="recurring.monthly_option" value="DAY_OF_MONTH" />
+                Den {{ moment(date).date() }}. hver måned
+              </label>
+              <label class="flex items-center gap-1">
+                <input type="radio" v-model="recurring.monthly_option" value="WEEKDAY_OF_MONTH" />
+                Den første {{ weekdayName }} hver måned
+              </label>
+            </div>
+          </div>
+        </template>
+
+        <div class="text-xs text-gray-500 italic mt-[2px]">{{ recurring.danish_text }}</div>
+        <div class="mt-4 text-sm text-gray-600">Gentag indtil <span class="font-light">(afslut)</span></div>
+        <VueDatePicker locale="da" :format-locale="da" v-model="recurring.ending_at" :clearable="true" :enable-time-picker="false" model-type="yyyy-MM-dd" :close-on-auto-apply="true" :auto-apply="true" format="dd. MMM yyyy" class="w-[160px] !mt-[2px]" />
+      </div>
     </div>
   </div>
 </template>
@@ -43,7 +80,7 @@
 /******************************
  * Imports
 ******************************/
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import moment from 'moment';
 import { PhClock, PhCaretUp } from '@phosphor-icons/vue';
 import { da } from 'date-fns/locale';
@@ -58,6 +95,8 @@ const endTime = defineModel('endTime');
 const endDate = defineModel('endDate');
 const allDay = defineModel('allDay');
 const isOpen = ref(false);
+const recurring = defineModel('recurring');
+const daysOfWeek = ['Man', 'Tir', 'Ons', 'Tor', 'Fre', 'Lør', 'Søn'];
 
 /******************************
  * Methods
@@ -70,6 +109,54 @@ const allDayUpdated = (value) => {
   }
 }
 
+const toggleDay = (dayIndex) => {
+  if (recurring.value.weekly_days.includes(dayIndex)) {
+    recurring.value.weekly_days = recurring.value.weekly_days.filter(d => d !== dayIndex);
+  } else {
+    recurring.value.weekly_days.push(dayIndex);
+  }
+};
+
+const weekdayName = computed(() => {
+  return moment(date.value).locale('da').format('dddd');
+});
+
+const getRecurrencePreview = () => {
+  const int = recurring.value.interval;
+  const freqMap = {
+    DAILY: 'dag',
+    WEEKLY: 'uge',
+    MONTHLY: 'måned',
+  };
+
+  let text = '';
+
+  if (int !== 1) {
+    text += `Gentages hver ${int}. ${freqMap[recurring.value.frequency.value]}`;
+  } else {
+    text += `Gentages hver ${freqMap[recurring.value.frequency.value]}`;
+  }
+
+  if (recurring.value.frequency.value === 'WEEKLY' && recurring.value.weekly_days.length) {
+    const dayNames = recurring.value.weekly_days.sort().map(i => moment().weekday(i).locale('da').format('dddd'));
+    text += ` på ${dayNames.join(', ')}`;
+  }
+
+  if (recurring.value.frequency.value === 'MONTHLY') {
+    if (recurring.value.monthly_option === 'DAY_OF_MONTH') {
+      text += ` den ${moment(date.value).date()}. i måneden`;
+    } else {
+      text += ` den første ${weekdayName.value} i måneden`;
+    }
+  }
+
+  if (recurring.value.ending_at) {
+    text += ` indtil ${moment(recurring.value.ending_at).format('D. MMM YYYY')}`;
+  }
+
+  return text;
+}
+
 /******************************
  * Watchers
 ******************************/
@@ -77,5 +164,29 @@ watch(date, (value) => {
   if (allDay.value && moment(value).isAfter(endDate.value)) {
     endDate.value = value;
   }
+});
+
+watch([recurring.value], () => {
+  let rule = `FREQ=${recurring.value.frequency.value}`;
+
+  if (recurring.value.frequency.value === 'WEEKLY' && recurring.value.weekly_days.length > 0) {
+    const dayMap = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'];
+    rule += `;BYDAY=${recurring.value.weekly_days.map(i => dayMap[i]).join(',')}`;
+  }
+
+  if (recurring.value.frequency.value === 'MONTHLY') {
+    if (recurring.value.monthly_option === 'DAY_OF_MONTH') {
+      rule += `;BYMONTHDAY=${moment(date.value).locale('da').date()}`;
+    } else if (recurring.value.monthly_option === 'WEEKDAY_OF_MONTH') {
+      rule += `;BYDAY=${moment(date.value).locale('en').format('dd').toUpperCase()};BYSETPOS=1`;
+    }
+  }
+
+  if (recurring.value.ending_at) {
+    rule += `;UNTIL=${moment(recurring.value.ending_at).utc().format('YYYYMMDD[T]HHmmss[Z]')}`;
+  }
+
+  recurring.value.danish_text = getRecurrencePreview();
+  recurring.value.rule = rule;
 });
 </script>

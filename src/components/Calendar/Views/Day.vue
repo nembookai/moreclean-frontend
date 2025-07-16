@@ -9,25 +9,6 @@
         <div class="text-[14px] ml-2 drop-shadow">{{ day.format('dddd') }}</div>
       </div>
     </div>
-    <div class="flex shadow-md sticky top-[99px] z-[14] bg-white" v-if="multiDayTasksForDay?.length">
-      <div class="w-[4.8%] border-b border-r relative px-2 flex flex-col justify-center text-center text-[11px] text-gray-500 font-medium border-gray-100">
-        Hele dagen
-      </div>
-      <div class="relative w-[95.2%]">
-        <div class="w-full relative p-1 flex flex-col gap-y-1 overflow-hidden border-b border-gray-100 hover-transition" :class="showAllTasks ? 'h-auto pb-4' : 'h-[58px]'">
-          <div class="h-[42px] w-full relative" v-for="task in multiDayTasksForDay" :key="task.id">
-            <div class="absolute top-1 w-full h-[42px] px-1">
-              <Calendar-Task :task="task" :showTime="false" :showTooltip="false" :showMultiDay="true" class="w-full h-full" />
-            </div>
-          </div>
-        </div>
-        <div class="absolute left-1/2 bottom-[-10px] hover:bg-primary-600 flex items-center z-20 bg-primary-500 text-white text-[10px] py-[2px] px-[8px] rounded-full shadow inner-shadow cursor-pointer group select-none hover-transition" v-if="multiDayTasksForDay?.length > 1" @click="showAllTasks = !showAllTasks">
-          <span v-if="!showAllTasks">Vis alle</span>
-          <span v-else>Skjul</span>
-          <PhCaretDown :size="12" weight="regular" class="ml-1 hover-transition" :class="showAllTasks ? 'rotate-180' : ''" />
-        </div>
-      </div>
-    </div>
     <div class="flex">
       <div class="w-[4.8%]">
         <div v-for="(time, timeIndex) in calendar.timeslots" :key="time" class="border-b border-r relative h-[50px] px-2 flex flex-col justify-end text-[11px] text-gray-400 border-gray-100 cursor-pointer hover:bg-[#fdfdfd]" @click="tasks.createFromDate(day, time)">
@@ -81,7 +62,6 @@ const activeGroup = ref(null);
  * Computed & Methods
 ******************************/
 const day = computed(() => calendar.activeDate.clone())
-const multiDayTasksForDay = computed(() => tasks.multiDayTasksDailyView(day.value))
 
 function acceptsOnlyTasks(task, time) {
   if (moment(task.start_time, 'HH:mm').add(1, 'hours').isSame(moment(time, 'HH:mm')) && task.date === day.value.format('YYYY-MM-DD')) {

@@ -11,25 +11,6 @@
         </div>
       </div>
     </div>
-    <div class="flex shadow-md sticky top-[99px] z-[14] bg-white" v-if="multiDayTasksForWeek?.length">
-      <div class="w-[4.8%] border-b border-r relative px-2 flex flex-col justify-center text-center text-[11px] text-gray-500 font-medium border-gray-100">
-        Hele ugen
-      </div>
-      <div class="relative w-[95.2%]">
-        <div class="w-full relative p-1 flex flex-col gap-y-1 overflow-hidden border-b border-gray-100 hover-transition" :class="showAllTasks ? 'h-auto pb-4' : 'h-[58px]'">
-          <div class="h-[42px] w-full relative" v-for="task in multiDayTasksForWeek" :key="task.id">
-            <div class="absolute top-1 h-[42px] px-1" :style="multiDayStyle(task, days)">
-              <Calendar-Task :task="task" :showTime="false" :showTooltip="false" :showMultiDay="true" class="w-full h-full" />
-            </div>
-          </div>
-        </div>
-        <div class="absolute left-1/2 bottom-[-10px] hover:bg-primary-600 flex items-center z-20 bg-primary-500 text-white text-[10px] py-[2px] px-[8px] rounded-full shadow inner-shadow cursor-pointer group select-none hover-transition" v-if="multiDayTasksForWeek?.length > 1" @click="showAllTasks = !showAllTasks">
-          <span v-if="!showAllTasks">Vis alle</span>
-          <span v-else>Skjul</span>
-          <PhCaretDown :size="12" weight="regular" class="ml-1 hover-transition" :class="showAllTasks ? 'rotate-180' : ''" />
-        </div>
-      </div>
-    </div>
     <div class="flex">
       <div class="w-[4.8%]">
         <div v-for="(time, timeIndex) in calendar.timeslots" :key="time" class="border-b border-r relative h-[50px] px-2 flex flex-col justify-end text-[11px] text-gray-400 border-gray-100">
@@ -91,8 +72,6 @@ const days = computed(() => {
   return Array.from({ length: 7 }, (_, i) => moment(startDate).add(i, 'days'))
 })
 
-const multiDayTasksForWeek = computed(() => tasks.multiDayTasksWeeklyView(days.value))
-
 const jumpToDay = (day) => {
   calendar.switchView(2)
   calendar.switchDate(day)
@@ -105,27 +84,6 @@ function getExtraClass(dayIndex) {
   }
 
   return 'w-[300px] max-h-[300px] right-0'
-}
-
-function multiDayStyle(task, weekDays) {
-  const taskStart = moment(task.date).startOf('day');
-  const taskEnd = moment(task.end_date).endOf('day');
-  const weekStart = weekDays[0].clone().startOf('day');
-  const weekEnd = weekDays[6].clone().endOf('day');
-
-  // Clamp start to weekStart
-  const clampedStart = moment.max(taskStart, weekStart);
-  const clampedEnd = moment.min(taskEnd, weekEnd);
-
-  const startIndex = weekDays.findIndex(day => day.isSame(clampedStart, 'day'));
-  const span = clampedEnd.diff(clampedStart, 'days') + 1;
-
-  const dayWidth = 100 / 7; // 7 days in week
-
-  return {
-    left: `${startIndex * dayWidth}%`,
-    width: `${span * dayWidth}%`
-  };
 }
 
 function acceptsOnlyTasks(task, day, time) {

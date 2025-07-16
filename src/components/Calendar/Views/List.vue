@@ -29,11 +29,7 @@
             <drag :delay="10" @dragstart="tasks.draggingTaskId = task.id" @dragend="tasks.draggingTaskId = null" v-for="task in day.tasks" :key="'task-' + task.id" :drag-image-opacity="0.5" :data="task" :go-back="true" mode="cut" type="card" @click.stop :class="{ 'pointer-events-none': tasks.draggingTaskId && tasks.draggingTaskId !== task.id }">
               <div class="text-[14px] flex items-center gap-x-2 rounded-full relative cursor-pointer group select-none hover-transition w-full hover:bg-gray-100 p-1" @click="tasks.setActiveTask(task)">
                 <div class="h-[25px] w-[25px] rounded-full" :style="{ backgroundColor: task.color }" :class="[textColorWhiteOrBlack(task.color)]"></div>
-                <div class="w-[130px] font-light text-gray-600 ml-5">
-                  <div v-if="!task.all_day">{{ task.start_time }} - {{ task.end_time }}</div>
-                  <div v-if="task.all_day && task.date !== task.end_date">{{ moment(task.date).format('DD. MMM') }} - {{ moment(task.end_date).format('DD. MMM') }}</div>
-                  <div v-if="task.all_day && task.date === task.end_date">Hele dagen</div>
-                </div>
+                <div class="w-[130px] font-light text-gray-600 ml-5">{{ task.start_time }} - {{ task.end_time }}</div>
                 <div class="font-medium text-gray-800">{{ task.title }}</div>
               </div>
             </drag>
@@ -82,13 +78,13 @@ const startDate = computed(() => {
 });
 
 const endDate = computed(() => {
-  return calendar.activeDate.clone().add(3, 'month').endOf('month');
+  return calendar.activeDate.clone().add(1, 'month').endOf('month');
 });
 
 const days = computed(() => {
   const days = [];
   for (let date = startDate.value.clone(); date.isBefore(endDate.value); date.add(1, 'day')) {
-    let dayTasks = tasks.tasksMonthlyView(date.clone());
+    let dayTasks = tasks.tasksListView(date.clone());
 
     if (date.isSame(calendar.activeDate, 'day') && !dayTasks?.length) {
       days.push({
@@ -117,7 +113,7 @@ const jumpToDay = (day) => {
 
 function acceptsOnlyTasks(task, day) {
   // Always block if trying to drop on the task's start date
-  if (task.date === day.format('YYYY-MM-DD') || task.all_day) {
+  if (task.date === day.format('YYYY-MM-DD')) {
     return false;
   }
 

@@ -58,7 +58,6 @@
           <div class="px-4 h-full flex items-center justify-center cursor-pointer hover:scale-[1.03] select-none hover-transition border-r border-gray-100 relative active:text-primary-600" :class="[ { 'text-white': calendar.activeView === 1 }, { '!border-0': calendar.activeView === 1 || calendar.activeView === 2 } ]" @click="calendar.switchView(1); $emit('viewChanged')"><PhListNumbers :size="17" weight="regular" /></div>
           <div class="px-4 h-full flex items-center justify-center cursor-pointer hover:scale-[1.03] select-none hover-transition border-r border-gray-100 relative active:text-primary-600" :class="[ { 'text-white': calendar.activeView === 2 }, { '!border-0': calendar.activeView === 2 || calendar.activeView === 3 } ]" @click="calendar.switchView(2); $emit('viewChanged')">Dag</div>
           <div class="px-4 h-full flex items-center justify-center cursor-pointer hover:scale-[1.03] select-none hover-transition border-r border-gray-100 relative active:text-primary-600" :class="[ { 'text-white': calendar.activeView === 3 }, { '!border-0': calendar.activeView === 3 || calendar.activeView === 4 } ]" @click="calendar.switchView(3); $emit('viewChanged')">Uge</div>
-          <div class="pl-4 pr-3.5 h-full flex items-center justify-center cursor-pointer hover:scale-[1.03] select-none hover-transition relative active:text-primary-600" :class="[ { 'text-white': calendar.activeView === 4 } ]" @click="calendar.switchView(4);">Måned</div>
         </div>
       </div>
     </div>
