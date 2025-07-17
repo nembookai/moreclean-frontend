@@ -4,7 +4,7 @@
       <Task-Creation-Customer v-model:customer="newTask.customer" :lastCustomerNumber="lastCustomerNumber" :prefillServiceAgreement="newTask.service_agreement" :loading="loading.customers" :allCustomers="customers" @updateFromCustomer="updateFromCustomer" @removeServiceAgreement="removeServiceAgreement" />
       <Task-Creation-Employees v-model:employees="newTask.employees" :loading="loading.employees" :allEmployees="employees" />
       <Task-Creation-Products v-model:products="newTask.products" :loading="loading.products" :allProducts="products" @updateFromProducts="updateFromProducts" />
-      <Task-Creation-DatePicker v-model:recurring="newTask.recurring" v-model:date="newTask.date" v-model:startTime="newTask.start_time" v-model:endTime="newTask.end_time" />
+      <Task-Creation-DatePicker v-model:recurring="newTask.recurring" :is_recurring="!!task.recurring_id" v-model:date="newTask.date" v-model:startTime="newTask.start_time" v-model:endTime="newTask.end_time" />
       <Task-Creation-Location v-model:location="newTask.location" />
       <Task-Creation-Economy v-if="!newTask.service_agreement_id" v-model:economy="newTask.economy" :start="newTask.start_time" :end="newTask.end_time" :products="newTask.products" :employees="newTask.employees" :customer="newTask.customer" />
       <Task-Creation-ColorPicker v-model:color="newTask.color" />
@@ -15,10 +15,30 @@
     </div>
     <div class="flex items-center gap-x-5 mt-5 justify-end">
       <div class="text-gray-500 text-[15px] cursor-pointer underline underline-offset-2 font-light hover-transition hover:opacity-80 active:opacity-100 active:translate-y-[-1.5px]" @click="emit('close')">Annuller</div>
-      <button class="btn btn__green" :disabled="loading.edit" @click="editTask">
+      <button class="btn btn__green" :disabled="loading.edit" v-if="!newTask.recurring?.enabled" @click="editTask(1)">
         <span v-if="!loading.edit">Gem opgaven</span>
         <span v-else>Gemmer opgaven...</span>
       </button>
+      <div class="relative">
+        <button class="btn btn__green" :disabled="loading.edit" v-if="newTask.recurring?.enabled" @click="showEditRecurring = !showEditRecurring">
+          <div class="flex items-center gap-x-1" v-if="!loading.edit">Gem opgaven <PhCaretDown :size="16" weight="bold" class="hover-transition" :class="{ 'rotate-180': showEditRecurring }" /></div>
+          <div class="flex items-center gap-x-1" v-else>Gemmer gentagelse...</div>
+        </button>
+        <transition name="dropdown">
+          <LayoutComponents-HoverDropdown :freeSlot="true" class="absolute top-[-80px] z-[99] right-0" @close="showEditRecurring = false" v-click-outside="() => showEditRecurring = false" v-if="showEditRecurring" extraclass="w-[250px] max-h-[300px]">
+          <template #free>
+            <div class="hover_dropdown hover_dropdown__small" @click="editTask(2)">
+              <div><PhPen :size="16" weight="fill" /></div>
+              Gem alle opgaver
+            </div>
+            <div class="hover_dropdown hover_dropdown__small" @click="editTask(3)">
+              <div><PhPen :size="16" weight="fill" /></div>
+              Gem og frigør opgaven
+            </div>
+          </template>
+          </LayoutComponents-HoverDropdown>
+        </transition>
+      </div>
     </div>
   </div>
 </template>
@@ -28,6 +48,7 @@
 ******************************/
 import { ref, inject, onBeforeMount } from 'vue';
 import { axiosClient } from '@/lib/axiosClient';
+import { PhCaretDown, PhPen } from '@phosphor-icons/vue';
 const props = defineProps(['task']);
 
 /******************************
@@ -50,11 +71,12 @@ const newTask = ref({
   start_time: props.task.start_time ? { value: props.task.start_time } : null,
   end_time: props.task.end_time ? { value: props.task.end_time } : null,
 });
+const showEditRecurring = ref(false);
 
 /******************************
  * Methods
 ******************************/
-const editTask = async () => {
+const editTask = async (method) => {
   if (!newTask.value.customer) {
     message.showError('Du skal vælge en kunde');
     return;
@@ -81,7 +103,20 @@ const editTask = async () => {
     newTask.value.date = moment().format('YYYY-MM-DD');
   }
 
-  await axiosClient.put(`task/${props.task.id}`, {
+  let id = props.task.id;
+
+  if (method === 2 && props.task.recurring_id) {
+    id = props.task.recurring_id;
+    newTask.value.id = props.task.recurring_id;
+  }
+
+  if (method === 3) {
+    id = null;
+    newTask.value.id = null;
+  }
+
+  await axiosClient.put(`task/${id}`, {
+    method: method,
     ...newTask.value,
     start_time: newTask.value.start_time?.value || null,
     end_time: newTask.value.end_time?.value || null,

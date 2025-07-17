@@ -22,7 +22,7 @@
         
         <template v-for="(group, gIndex) in tasks.groupedTasks(day)" :key="gIndex">
           <drag @dragstart="tasks.draggingTaskId = task.id" @dragend="tasks.draggingTaskId = null" v-if="group.length <= 2 && group.length > 0" v-for="(task, tIndex) in group" :drag-image-opacity="0.5" :data="task" :go-back="true" mode="cut" type="card" :key="'task-' + task.id" class="absolute" :style="{ top: calendar.getTaskTop(task.start_time) + 'px', left: group.length === 1 ? '4px' : tIndex === 0 ? '4px' : 'calc(50% + 2px)', width: group.length === 1 ? 'calc(100% - 8px)' : 'calc(50% - 6px)', height: calendar.getTaskHeight(task) + 'px' }" :class="{ 'pointer-events-none': tasks.draggingTaskId && tasks.draggingTaskId !== task.id }">
-            <Calendar-Task :allowResize="true" :task="task" :dayIndex="dayIndex" />
+            <Calendar-Task :allowResize="!task?.recurring?.enabled" :task="task" :dayIndex="dayIndex" />
           </drag>
           <div v-else class="absolute left-1 right-1" :style="{ top: calendar.getTaskTop(calendar.getEarliestStart(group)) + 'px', height: calendar.getGroupHeight(group) + 'px' }" :class="{ 'pointer-events-none': tasks.draggingTaskId }">
             <div class="relative h-full">
@@ -62,7 +62,6 @@ const calendar = Calendar();
 const emit = defineEmits(['viewChanged']);
 const activeGroup = ref(null);
 const tasks = Tasks();
-const showAllTasks = ref(false);
 
 /******************************
  * Computed & Methods
@@ -87,6 +86,10 @@ function getExtraClass(dayIndex) {
 }
 
 function acceptsOnlyTasks(task, day, time) {
+  if (task.recurring?.enabled) {
+    return false;
+  }
+
   if (moment(task.start_time, 'HH:mm').add(1, 'hours').isSame(moment(time, 'HH:mm')) && task.date === day.format('YYYY-MM-DD')) {
     return false;
   }

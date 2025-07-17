@@ -4,11 +4,7 @@
     <div class="text-gray-700 text-[13px] leading-[15px]" v-if="!isOpen">
       <div>
         <span>{{ moment(date).format('DD. MMMM YYYY') }}</span>
-        <span v-if="!allDay" class="ml-2">kl. {{ startTime.value }} - {{ endTime.value }}</span>
-        <span v-else-if="endDate">
-          <span class="mx-1.5">-</span>
-          <span>{{ moment(endDate).format('DD. MMMM YYYY') }}</span>
-        </span>
+        <span class="ml-2">kl. {{ startTime.value }} - {{ endTime.value }}</span>
       </div>
       <div class="text-gray-500 text-[12px] font-light" v-if="!recurring.enabled">Gentages ikke</div>
       <div class="text-gray-500 text-[12px] font-light" v-else>{{ recurring.danish_text }}</div>
@@ -17,27 +13,20 @@
       <PhCaretUp :size="16" weight="bold" class="absolute right-[10px] top-[-3px] cursor-pointer hover-transition hover:text-primary-600 active:text-primary-800 select-none" @click.stop="isOpen = false" />
       <div class="text-gray-700 text-[13px] font-medium leading-[15px]">Vælg dato & tidspunkt</div>
       <div class="flex gap-x-1.5 mt-2">
-        <VueDatePicker locale="da" :format-locale="da" text-input v-model="date" :clearable="false" :enable-time-picker="false" model-type="yyyy-MM-dd" :close-on-auto-apply="true" :auto-apply="true" format="dd. MMM yyyy" class="w-[160px]"></VueDatePicker>
-        <template v-if="!allDay">
-          <div class="h-[37.5px] ml-3 px-1 flex items-center text-sm justify-center text-gray-500 font-light bg-gray-200">kl.</div>
-          <div class="relative">
-            <PhClock :size="15" weight="bold" class="text-primary-600 absolute top-[11.5px] left-[10px] z-[10]" />
-            <DropdownWrite fillPlaceholder="Vælg start tidspunkt" :showArrowDropdown="false" :values="times" :chosenValue="startTime" @selectValue="(time) => startTime = time" display="value" dropdownWidth="w-[150px]" class="!mt-0" overwriteInput="!w-[100px] !pl-8 !h-[37.5px] !m-0 hover:!bg-primary-50 hover:!border-gray-200 hover:!shadow-none !transition-all !ease-in-out !duration-300" :filterable="['value']" />
-          </div>
-          <div class="h-[37.5px] px-1 flex items-center text-sm justify-center text-gray-500 font-light bg-gray-200">til</div>
-          <div class="relative">
-            <PhClock :size="15" weight="bold" class="text-primary-600 absolute top-[11.5px] left-[10px] z-[10]" />
-            <DropdownWrite fillPlaceholder="Vælg slut tidspunkt" :showArrowDropdown="false" :values="times" :chosenValue="endTime" @selectValue="(time) => endTime = time" display="value" dropdownWidth="w-[150px]" class="!mt-0" overwriteInput="!w-[100px] !pl-8 !h-[37.5px] !m-0 hover:!bg-primary-50 hover:!border-gray-200 hover:!shadow-none !transition-all !ease-in-out !duration-300" :filterable="['value']" />
-          </div>
-        </template>
-        <template v-else>
-          <div class="h-[37.5px] px-1 flex items-center text-sm justify-center text-gray-500 font-light bg-gray-200">til</div>
-          <VueDatePicker locale="da" :format-locale="da" :min-date="date" text-input v-model="endDate" :clearable="false" :enable-time-picker="false" model-type="yyyy-MM-dd" :close-on-auto-apply="true" :auto-apply="true" format="dd. MMM yyyy" class="w-[160px]"></VueDatePicker>
-        </template>
+        <VueDatePicker locale="da" :format-locale="da" v-if="!is_recurring" text-input v-model="date" :clearable="false" :enable-time-picker="false" model-type="yyyy-MM-dd" :close-on-auto-apply="true" :auto-apply="true" format="dd. MMM yyyy" class="w-[160px]"></VueDatePicker>
+        <div class="h-[37.5px] px-1 flex items-center text-sm justify-center text-gray-500 font-light bg-gray-200" :class="{ 'ml-3': !is_recurring }">kl.</div>
+        <div class="relative">
+          <PhClock :size="15" weight="bold" class="text-primary-600 absolute top-[11.5px] left-[10px] z-[10]" />
+          <DropdownWrite fillPlaceholder="Vælg start tidspunkt" :showArrowDropdown="false" :values="times" :chosenValue="startTime" @selectValue="(time) => startTime = time" display="value" dropdownWidth="w-[150px]" class="!mt-0" overwriteInput="!w-[100px] !pl-8 !h-[37.5px] !m-0 hover:!bg-primary-50 hover:!border-gray-200 hover:!shadow-none !transition-all !ease-in-out !duration-300" :filterable="['value']" />
+        </div>
+        <div class="h-[37.5px] px-1 flex items-center text-sm justify-center text-gray-500 font-light bg-gray-200">til</div>
+        <div class="relative">
+          <PhClock :size="15" weight="bold" class="text-primary-600 absolute top-[11.5px] left-[10px] z-[10]" />
+          <DropdownWrite fillPlaceholder="Vælg slut tidspunkt" :showArrowDropdown="false" :values="times" :chosenValue="endTime" @selectValue="(time) => endTime = time" display="value" dropdownWidth="w-[150px]" class="!mt-0" overwriteInput="!w-[100px] !pl-8 !h-[37.5px] !m-0 hover:!bg-primary-50 hover:!border-gray-200 hover:!shadow-none !transition-all !ease-in-out !duration-300" :filterable="['value']" />
+        </div>
       </div>
-      <!-- <LayoutComponents-Toggle class="mt-3" v-model="allDay" @updated="allDayUpdated" text="Hele dagen" small /> -->
-      <LayoutComponents-Toggle class="mt-3" v-model="recurring.enabled" text="Gentagelse" small />
-      <div v-if="recurring.enabled" class="mt-3 text-sm">
+      <LayoutComponents-Toggle class="mt-3" v-model="recurring.enabled" text="Gentagelse" small v-if="!is_recurring" />
+      <div v-if="recurring.enabled && !is_recurring" class="mt-3 text-sm">
         <div class="text-sm text-gray-600">Gentag hver</div>
         <div class="flex gap-2 items-center mt-[-2px]">
           <input type="number" min="1" v-model="recurring.interval" class="input !w-[80px]" />            
@@ -85,6 +74,7 @@ import moment from 'moment';
 import { PhClock, PhCaretUp } from '@phosphor-icons/vue';
 import { da } from 'date-fns/locale';
 import { times } from '@/composables/globalHelper';
+const props = defineProps(['is_recurring']);
 
 /******************************
  * Refs & const
@@ -93,7 +83,6 @@ const date = defineModel('date');
 const startTime = defineModel('startTime');
 const endTime = defineModel('endTime');
 const endDate = defineModel('endDate');
-const allDay = defineModel('allDay');
 const isOpen = ref(false);
 const recurring = defineModel('recurring');
 const daysOfWeek = ['Man', 'Tir', 'Ons', 'Tor', 'Fre', 'Lør', 'Søn'];
@@ -101,14 +90,6 @@ const daysOfWeek = ['Man', 'Tir', 'Ons', 'Tor', 'Fre', 'Lør', 'Søn'];
 /******************************
  * Methods
 ******************************/
-const allDayUpdated = (value) => {
-  if (value) {
-    endDate.value = date.value;
-  } else {
-    endDate.value = null;
-  }
-}
-
 const toggleDay = (dayIndex) => {
   if (recurring.value.weekly_days.includes(dayIndex)) {
     recurring.value.weekly_days = recurring.value.weekly_days.filter(d => d !== dayIndex);
@@ -180,10 +161,6 @@ watch([recurring.value], () => {
     } else if (recurring.value.monthly_option === 'WEEKDAY_OF_MONTH') {
       rule += `;BYDAY=${moment(date.value).locale('en').format('dd').toUpperCase()};BYSETPOS=1`;
     }
-  }
-
-  if (recurring.value.ending_at) {
-    rule += `;UNTIL=${moment(recurring.value.ending_at).utc().format('YYYYMMDD[T]HHmmss[Z]')}`;
   }
 
   recurring.value.danish_text = getRecurrencePreview();

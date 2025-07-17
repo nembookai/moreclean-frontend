@@ -1,7 +1,7 @@
 <template>
   <div>
     <ModalShow :condition="deleteTask">
-      <DeletePrompt :msg="`Er du sikker på du vil slette opgaven ${tasks.activeTask.title}?`" @delete="tasks.deleteTask(tasks.activeTask.id)" @close="deleteTask = false" />
+      <DeletePrompt :msg="deleteTextSure" @delete="tasks.deleteTask(tasks.activeTask, deleteMethod)" @close="deleteTask = false" />
     </ModalShow>
 
     <div class="bg-[#f8f8f8] rounded-[8px] my-[48px] drop-shadow z-[210] w-[600px] relative" ref="modal">
@@ -108,7 +108,30 @@
             </div>
           </div>
           <div class="flex items-center justify-end gap-x-5">
-            <div class="text-red-500 underline text-[13px] font-light underline-offset-2 leading-[15px] select-none cursor-pointer hover-transition hover:opacity-80 active:opacity-100 active:translate-y-[-1.5px]" @click.stop="deleteTask = true">Slet opgaven</div>
+            <div v-if="!tasks.activeTask.recurring?.enabled" class="text-red-500 underline text-[13px] font-light underline-offset-2 leading-[15px] select-none cursor-pointer hover-transition hover:opacity-80 active:opacity-100 active:translate-y-[-1.5px]" @click.stop="deleteFromMethod(1)">Slet opgaven</div>
+            <div class="relative">
+              <div v-if="tasks.activeTask.recurring?.enabled" class="text-red-600 underline flex items-center gap-x-1 text-[13px] font-light underline-offset-2 leading-[15px] select-none cursor-pointer hover-transition hover:opacity-80 active:opacity-100 active:translate-y-[-1.5px]" @click.stop="showDeleteRecurring = !showDeleteRecurring">
+                Sletning mulighed <PhCaretDown :size="16" weight="bold" class="hover-transition" :class="{ 'rotate-180': showDeleteRecurring }" />
+              </div>
+              <transition name="dropdown">
+                <LayoutComponents-HoverDropdown :freeSlot="true" class="absolute top-[30px] z-[99] right-0" @close="showDeleteRecurring = false" v-click-outside="() => showDeleteRecurring = false" v-if="showDeleteRecurring" extraclass="w-[250px] max-h-[300px]">
+                <template #free>
+                  <div class="hover_dropdown hover_dropdown__small hover_dropdown__red" @click="deleteFromMethod(2)">
+                    <div><PhBackspace :size="16" weight="fill" /></div>
+                    Slet kun denne opgave
+                  </div>
+                  <div class="hover_dropdown hover_dropdown__small hover_dropdown__red" @click="deleteFromMethod(3)">
+                    <div><PhBackspace :size="16" weight="fill" /></div>
+                    Slet denne & følgende opgaver
+                  </div>
+                  <div class="hover_dropdown hover_dropdown__small hover_dropdown__red" @click="deleteFromMethod(4)">
+                    <div><PhBackspace :size="16" weight="fill" /></div>
+                    Slet alle opgaver
+                  </div>
+                </template>
+                </LayoutComponents-HoverDropdown>
+              </transition>
+            </div>
             <button @click="showEditTask = true" class="flex items-center justify-center select-none gap-x-1.5 px-[15px] py-[8px] rounded-[4px] text-[13.5px] hover-transition hover:opacity-80 active:opacity-100 active:translate-y-[-1.5px]" :style="{ backgroundColor: tasks.activeTask.color }" :class="textColorWhiteOrBlack(tasks.activeTask.color)">
               <PhPencilSimple :size="14" weight="fill" />
               Rediger opgave
@@ -126,7 +149,7 @@
 ******************************/
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
 import { textColorWhiteOrBlack } from '@/composables/globalHelper'
-import { PhChatText, PhClock, PhPencilSimple, PhMapPin, PhX, PhUser, PhIdentificationBadge, PhPackage, PhCoins, PhCaretDown } from '@phosphor-icons/vue';
+import { PhChatText, PhClock, PhPencilSimple, PhMapPin, PhX, PhUser, PhIdentificationBadge, PhPackage, PhCoins, PhCaretDown, PhBackspace } from '@phosphor-icons/vue';
 import moment from 'moment';
 import { formatPrice } from '@/composables/Price';
 import { Tasks } from '@/store/tasks';
@@ -140,6 +163,9 @@ const modal = ref();
 const deleteTask = ref(false);
 const showEditTask = ref(false);
 const showEconomy = ref(false);
+const showDeleteRecurring = ref(false);
+const deleteMethod = ref(1);
+const deleteTextSure = ref('');
 
 /******************************
  * Methods & computed
@@ -157,6 +183,20 @@ function closeModal() {
     emit('close');
   }
 }
+
+const deleteFromMethod = (method) => {
+  if (method === 1 || method === 2) {
+    deleteTextSure.value = `Er du sikker på du vil slette opgaven ${tasks.activeTask.title}?`;
+  } else if (method === 3) {
+    deleteTextSure.value = `Er du sikker på du vil slette alle fremtidige opgaver for ${tasks.activeTask.title}?`;
+  } else if (method === 4) {
+    deleteTextSure.value = `Er du sikker på du vil slette alle opgaver for ${tasks.activeTask.title}?`;
+  }
+
+  showDeleteRecurring.value = false;
+  deleteMethod.value = method;
+  deleteTask.value = true;
+};
 
 const earnings = computed(() => {
   const start = moment(tasks.activeTask.start_time, 'HH:mm');

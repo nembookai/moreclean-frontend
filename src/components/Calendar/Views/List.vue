@@ -6,7 +6,7 @@
     <div class="grid" v-if="days.find((day) => day.tasks?.length)">
       <template v-for="(day, index) in days" :key="day">
         <Drop :accepts-data="(task) => acceptsOnlyTasks(task, moment())" @drop="(task) => tasks.handleDrop(task, moment())" v-if="day.isToday && !day.tasks?.length" class="bg-white relative h-auto min-h-[40px] items-start gap-x-5 flex p-4 border-x border-gray-200">
-          <div class="flex items-center justify-start cursor-pointer w-[100px] text-nowrap" @click.stop="jumpToDay(day.date)" >
+          <div class="flex items-center justify-start cursor-pointer w-[100px] text-nowrap" @click.stop="jumpToDay(day.date)">
             <div class="text-white bg-primary-500 p-1.5 -m-1.5 mr-0.5 rounded-full font-semibold text-[16.5px] leading-none">{{ day.date.format('DD') }}</div>
             <div class="text-[12.5px] text-center font-medium inline-block ml-1 text-primary-700 leading-none">
                {{ day.date.format('MMM') }} - {{ day.date.format('dddd').substring(0, 3) }}
@@ -83,23 +83,14 @@ const endDate = computed(() => {
 
 const days = computed(() => {
   const days = [];
+  
   for (let date = startDate.value.clone(); date.isBefore(endDate.value); date.add(1, 'day')) {
     let dayTasks = tasks.tasksListView(date.clone());
 
-    if (date.isSame(calendar.activeDate, 'day') && !dayTasks?.length) {
-      days.push({
-        date: date.clone(),
-        tasks: null,
-        isToday: true
-      })
-    }
-
-    if (dayTasks?.length) {
-      days.push({
-        date: date.clone(),
-        tasks: dayTasks
-      });
-    }
+    days.push({
+      date: date.clone(),
+      tasks: dayTasks
+    });
   }
 
   return days;

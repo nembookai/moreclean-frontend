@@ -8,7 +8,7 @@
       <Task-Active @close="tasks.activeTask = null" />
     </ModalShow>
 
-    <div class="overflow-y-auto max-h-[calc(100vh-50px)] mt-5 pr-3" ref="calendarContainer">
+    <div class="overflow-y-auto max-h-[calc(100vh-50px)] mt-5 pr-3" ref="calendarContainer" v-if="!loading.loading">
       <Calendar-Menu class="sticky top-0 z-[20]" @viewChanged="viewChanged" />
       <Calendar-Views-Week class="flex-1" v-if="calendar.activeView === 3" @viewChanged="viewChanged" />
       <Calendar-Views-Day class="flex-1" v-if="calendar.activeView === 2" />
@@ -24,6 +24,7 @@ import { ref, onMounted, nextTick } from 'vue';
 import { Calendar } from '@/store/calendar';
 import { Tasks } from '@/store/tasks';
 import { onBeforeMount } from 'vue';
+import { Loading } from '@/store/loading';
 
 /******************************
  * Refs
@@ -31,12 +32,15 @@ import { onBeforeMount } from 'vue';
 const calendar = Calendar();
 const tasks = Tasks();
 const calendarContainer = ref(null);
+const loading = Loading();
 
 /******************************
  * Lifecycle Hooks
 ******************************/
 onBeforeMount(async () => {
+  loading.load('Henter data');
   await tasks.getTasks();
+  loading.reset();
 });
 
 onMounted(() => {

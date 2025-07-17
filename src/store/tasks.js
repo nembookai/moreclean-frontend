@@ -14,24 +14,16 @@ export const Tasks = defineStore('tasks', () => {
   const prefillTask = ref({});
   const draggingTaskId = ref(null);
 
-  function makeOverlappingTask(task) {
-    return {
-      ...task,
-      overlaps: true,
-      overlapping: null,
-      start_time: task.overlapping.start_time,
-      end_time: task.overlapping.end_time,
-      date: task.overlapping.date,
-      duration: task.overlapping.duration,
-      original_task: task,
-    };
-  }
-
   function groupedTasks(day) {
     const dayStr = day.format('YYYY-MM-DD');
     const dayTasks = [];
+    const groups = [];
+
+    if (!tasks.value || !tasks.value?.[dayStr]) {
+      return [];
+    }
   
-    for (const task of tasks.value) {
+    for (const task of tasks.value[dayStr]) {
       const taskDate = task.date;
       const start = moment(`${task.date} ${task.start_time}`, 'YYYY-MM-DD HH:mm');
       let end = moment(`${task.date} ${task.end_time}`, 'YYYY-MM-DD HH:mm');
@@ -45,19 +37,12 @@ export const Tasks = defineStore('tasks', () => {
       if (taskDate === dayStr) {
         dayTasks.push(task);
       }
-  
-      if (task.overlapping && task.overlapping.date === dayStr) {
-        dayTasks.push(makeOverlappingTask(task));
-      }
     }
   
     // Sort by time
     dayTasks.sort((a, b) =>
       moment(a.start_time, 'HH:mm').diff(moment(b.start_time, 'HH:mm'))
     );
-  
-    // Group by overlap
-    const groups = [];
   
     for (const task of dayTasks) {
       let placed = false;
@@ -77,26 +62,35 @@ export const Tasks = defineStore('tasks', () => {
   }
 
   function tasksListView(day) {
-    const allTasks = tasks.value;
     const dayStr = day.format('YYYY-MM-DD');
-    const results = [];
+    const dayTasks = [];
+
+    if (!tasks.value || !tasks.value?.[dayStr]) {
+      return [];
+    }
   
-    for (const task of allTasks) {
-      const start = moment(task.date);
-      const end = moment(task.date);
+    for (const task of tasks.value[dayStr]) {
+      const taskDate = task.date;
+      const start = moment(`${task.date} ${task.start_time}`, 'YYYY-MM-DD HH:mm');
+      let end = moment(`${task.date} ${task.end_time}`, 'YYYY-MM-DD HH:mm');
   
-      // Main task span
-      if (day.isBetween(start, end, 'day', '[]')) {
-        results.push({ ...task, display_date: dayStr });
+      // Adjust end time if overnight
+      if (end.isSameOrBefore(start)) {
+        end.add(1, 'day');
       }
   
-      // If it has an overlapping segment on this day
-      if (task.overlapping && task.overlapping.date === dayStr) {  
-        results.push(makeOverlappingTask({ ...task, display_date: dayStr }));
+      // Normal segment (starts this day)
+      if (taskDate === dayStr) {
+        dayTasks.push(task);
       }
     }
   
-    return results;
+    // Sort by time
+    dayTasks.sort((a, b) =>
+      moment(a.start_time, 'HH:mm').diff(moment(b.start_time, 'HH:mm'))
+    );
+
+    return dayTasks;
   }
 
   async function getTasks() {
@@ -106,13 +100,24 @@ export const Tasks = defineStore('tasks', () => {
   }
 
   function addToTasks(task) {
-    tasks.value.push(task);
+    if (!tasks.value[task.date]) {
+      tasks.value[task.date] = [];
+    }
+
+    tasks.value[task.date].push(task);
   }
 
-  async function deleteTask(taskId) {
-    await axiosClient.delete(`task/${taskId}`).then((response) => {
-      tasks.value = tasks.value.filter(t => t.id !== taskId);
+  async function deleteTask(task, method) {
+    let id = task.recurring_id ? task.recurring_id : task.id;
+
+    await axiosClient.delete(`task/${id}/${method}/${task.date}`).then((response) => {
+      tasks.value[task.date] = tasks.value[task.date].filter(t => t.id !== task.id);
       activeTask.value = null;
+      if (task.recurring?.enabled) {
+        if (method === 3 || method === 4) {
+          window.location.reload();
+        }
+      }
       message.showComplete('Opgaven er blevet slettet');
     }).catch((error) => { });
   }
@@ -144,7 +149,7 @@ export const Tasks = defineStore('tasks', () => {
       taskInFocus = taskInFocus.original_task;
     }
   
-    tasks.value = tasks.value.filter(t => t.id !== taskInFocus.id);
+    tasks.value[taskInFocus.date] = tasks.value[taskInFocus.date].filter(t => t.id !== taskInFocus.id);
   
     // Set new date
     taskInFocus.date = day.format('YYYY-MM-DD');
