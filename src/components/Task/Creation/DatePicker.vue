@@ -82,7 +82,6 @@ const props = defineProps(['is_recurring']);
 const date = defineModel('date');
 const startTime = defineModel('startTime');
 const endTime = defineModel('endTime');
-const endDate = defineModel('endDate');
 const isOpen = ref(false);
 const recurring = defineModel('recurring');
 const daysOfWeek = ['Man', 'Tir', 'Ons', 'Tor', 'Fre', 'Lør', 'Søn'];
@@ -141,12 +140,6 @@ const getRecurrencePreview = () => {
 /******************************
  * Watchers
 ******************************/
-watch(date, (value) => {
-  if (allDay.value && moment(value).isAfter(endDate.value)) {
-    endDate.value = value;
-  }
-});
-
 watch([recurring.value], () => {
   let rule = `FREQ=${recurring.value.frequency.value}`;
 

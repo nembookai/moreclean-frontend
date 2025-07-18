@@ -93,13 +93,7 @@ export const Tasks = defineStore('tasks', () => {
     return dayTasks;
   }
 
-  async function getTasks() {
-    await axiosClient.get('task').then((response) => {
-      tasks.value = response.tasks;
-    }).catch((error) => { });
-  }
-
-  function addToTasks(task) {
+  function addTask(task) {
     if (!tasks.value[task.date]) {
       tasks.value[task.date] = [];
     }
@@ -122,8 +116,15 @@ export const Tasks = defineStore('tasks', () => {
     }).catch((error) => { });
   }
 
-  function updateActiveTask(task) {
-    activeTask.value = task;
+  function updateTask(allTasks) {
+    if (allTasks.length > 1) {
+      window.location.reload();
+      return;
+    }
+
+    activeTask.value = allTasks[0];
+    let index = tasks.value[activeTask.value.date].findIndex(t => t.id === activeTask.value.id);
+    tasks.value[activeTask.value.date][index] = activeTask.value;
   }
 
   function createFromDate(day, time = null) {
@@ -183,7 +184,7 @@ export const Tasks = defineStore('tasks', () => {
   
     await updateTaskBackend(taskInFocus, (task) => {
       taskInFocus.title = task.title;
-      addToTasks(taskInFocus);
+      addTask(taskInFocus);
       message.showComplete('Opgaven er rykket');
     });
   }
@@ -202,5 +203,5 @@ export const Tasks = defineStore('tasks', () => {
     }
   }
   
-  return { tasks, groupedTasks, tasksListView, showTaskCreation, getTasks, addToTasks, activeTask, deleteTask, updateActiveTask, createFromDate, prefillTask, handleDrop, draggingTaskId, updateTaskBackend, setActiveTask }
+  return { tasks, groupedTasks, tasksListView, showTaskCreation, addTask, activeTask, deleteTask, updateTask, createFromDate, prefillTask, handleDrop, draggingTaskId, updateTaskBackend, setActiveTask }
 });

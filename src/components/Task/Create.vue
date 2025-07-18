@@ -52,6 +52,7 @@ const newTask = ref({
   economy: {
     hourly_price: 0,
     fixed_price: 0,
+    invoice_hours: 1,
   },
   service_agreement_id: null,
   recurring: {
@@ -135,8 +136,10 @@ const createTask = async () => {
     customer_id: newTask.value.customer?.id,
   }).then((response) => {
     message.showComplete('Opgaven er oprettet');
-    emit('created', response.task);
-  }).catch((error) => { });
+    emit('created', response.tasks);
+  }).catch((error) => { 
+    console.log(error);
+  });
 
   loading.value.create = false;
 }

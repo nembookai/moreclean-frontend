@@ -123,9 +123,9 @@ const editTask = async (method) => {
     customer_id: newTask.value.customer?.id,
   }).then((response) => {
     message.showComplete('Opgaven er opdateret');
-    emit('updated', response.task);
+    emit('updated', response.tasks);
     emit('close');
-  }).catch((error) => { });
+  }).catch((error) => {  });
 
   loading.value.edit = false;
 }

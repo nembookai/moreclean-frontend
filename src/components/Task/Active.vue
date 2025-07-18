@@ -139,7 +139,7 @@
           </div>
         </div>
       </template>
-      <Task-Edit class="p-5" v-else :task="tasks.activeTask" @close="showEditTask = false" @updated="tasks.updateActiveTask" />
+      <Task-Edit class="p-5" v-else :task="tasks.activeTask" @close="showEditTask = false" @updated="tasks.updateTask" />
     </div>
   </div>
 </template>

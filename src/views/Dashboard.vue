@@ -1,7 +1,7 @@
 <template>
   <div>
     <ModalShow :condition="tasks.showTaskCreation">
-      <Task-Create @close="tasks.showTaskCreation = false; tasks.prefillTask = {};" @created="addNewTask" />
+      <Task-Create @close="tasks.showTaskCreation = false; tasks.prefillTask = {};" @created="addNewTasks" />
     </ModalShow>
 
     <ModalShow :condition="tasks.activeTask">
@@ -25,6 +25,7 @@ import { Calendar } from '@/store/calendar';
 import { Tasks } from '@/store/tasks';
 import { onBeforeMount } from 'vue';
 import { Loading } from '@/store/loading';
+import { axiosClient } from '@/lib/axiosClient';
 
 /******************************
  * Refs
@@ -39,7 +40,11 @@ const loading = Loading();
 ******************************/
 onBeforeMount(async () => {
   loading.load('Henter data');
-  await tasks.getTasks();
+
+  await axiosClient.get('task').then((response) => {
+    tasks.tasks = response.tasks;
+  }).catch((error) => { });
+  
   loading.reset();
 });
 
@@ -67,8 +72,11 @@ async function scrollToCenter() {
   }
 }
 
-function addNewTask(task) {
-  tasks.addToTasks(task);
+function addNewTasks(newTasks) {
+  newTasks.forEach(task => {
+    tasks.addTask(task);
+  });
+  
   tasks.showTaskCreation = false;
   tasks.prefillTask = {};
 }
