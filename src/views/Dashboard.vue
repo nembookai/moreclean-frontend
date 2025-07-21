@@ -41,15 +41,16 @@ const loading = Loading();
 onBeforeMount(async () => {
   loading.load('Henter data');
 
-  await axiosClient.get('task').then((response) => {
+  await axiosClient.get('task').then(async (response) => {
     tasks.tasks = response.tasks;
+    await nextTick();
+
+    setTimeout(() => {
+      scrollToCenter();
+    }, 10);
   }).catch((error) => { });
   
   loading.reset();
-});
-
-onMounted(() => {
-  scrollToCenter();
 });
 
 /******************************

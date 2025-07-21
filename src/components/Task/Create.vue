@@ -45,7 +45,7 @@ const calendar = Calendar();
 const newTask = ref({
   date: tasks.prefillTask.date || calendar.activeDate.clone().format('YYYY-MM-DD'),
   start_time: { value: tasks.prefillTask.start_time || moment().minutes(Math.round(moment().minutes() / 30) * 30).format('HH:mm') },
-  end_time: { value: tasks.prefillTask.end_time || moment().minutes(Math.round(moment().minutes() / 30) * 30).add(1, 'hours').format('HH:mm') },
+  end_time: { value: tasks.prefillTask.end_time || moment().minutes(Math.round(moment().minutes() / 30) * 30).add(2, 'hours').format('HH:mm') },
   color: taskColors[7],
   employees: [],
   products: [],

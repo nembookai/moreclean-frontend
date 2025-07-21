@@ -164,6 +164,10 @@ function stopResizeTop(resizeHandler, stopHandler, task) {
 }
 
 function getLineClampClass() {
+  if (calendar.activeView === 3) {
+    return 'line-clamp-2';
+  }
+
   if (calendar.getTaskHeight(props.task) === 25) {
     return 'line-clamp-1';
   }
