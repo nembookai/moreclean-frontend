@@ -28,9 +28,10 @@
             <div>
               <div class="text-gray-700 text-[15px] font-semibold leading-[15px]">Medarbejdere</div>
               <div class="text-gray-800 text-[14px] font-light mt-1">
-                <div v-for="employee in tasks.activeTask.employees" :key="employee.id">
+                <div v-if="tasks.activeTask.employees?.length" v-for="employee in tasks.activeTask.employees" :key="employee.id">
                   <span>{{ employee.name }}</span>
                 </div>
+                <div v-else class="text-gray-500 text-[14px] font-light">Ingen medarbejdere tilføjet</div>
               </div>
             </div>
           </div>

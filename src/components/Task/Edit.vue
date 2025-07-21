@@ -82,11 +82,6 @@ const editTask = async (method) => {
     return;
   }
 
-  if (!newTask.value.employees?.length) {
-    message.showError('Du skal vælge mindst én medarbejder');
-    return;
-  }
-
   if (!newTask.value.products?.length) {
     message.showError('Du skal vælge mindst ét produkt');
     return;

@@ -108,7 +108,7 @@ function stopResize(resizeHandler, stopHandler, task) {
 
   if (hasMovedEnough) {
     tasks.updateTaskBackend(task, (updatedTask) => {
-      task.title = updatedTask.title;
+      task.title = updatedTask[0].title;
       message.showComplete('Opgaven er rykket');
     });
   }
@@ -157,7 +157,7 @@ function stopResizeTop(resizeHandler, stopHandler, task) {
 
   if (hasMovedEnough) {
     tasks.updateTaskBackend(task, (updatedTask) => {
-      task.title = updatedTask.title;
+      task.title = updatedTask[0].title;
       message.showComplete('Opgaven er rykket');
     });
   }

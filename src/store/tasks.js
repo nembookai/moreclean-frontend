@@ -182,8 +182,8 @@ export const Tasks = defineStore('tasks', () => {
         }
       : null;
   
-    await updateTaskBackend(taskInFocus, (task) => {
-      taskInFocus.title = task.title;
+    await updateTaskBackend(taskInFocus, (tasks) => {
+      taskInFocus.title = tasks[0].title;
       addTask(taskInFocus);
       message.showComplete('Opgaven er rykket');
     });
@@ -191,7 +191,7 @@ export const Tasks = defineStore('tasks', () => {
 
   async function updateTaskBackend(task, callback = () => {}) {
     await axiosClient.put(`task/${task.id}`, task).then((response) => {
-      callback(response.task);
+      callback(response.tasks);
     }).catch((error) => { });
   }
 
