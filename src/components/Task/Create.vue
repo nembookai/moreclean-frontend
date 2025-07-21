@@ -7,7 +7,7 @@
       <div class="grid grid-cols-6 gap-2.5">
         <Task-Creation-Customer v-model:customer="newTask.customer" :lastCustomerNumber="lastCustomerNumber" :loading="loading.customers" :allCustomers="customers" @updateFromCustomer="updateFromCustomer" @removeServiceAgreement="removeServiceAgreement" />
         <Task-Creation-Employees v-model:employees="newTask.employees" :loading="loading.employees" :allEmployees="employees" />
-        <Task-Creation-Products v-model:products="newTask.products" :loading="loading.products" :allProducts="products" @updateFromProducts="updateFromProducts" />
+        <Task-Creation-Products v-model:products="newTask.products" :loading="loading.products" :manually_changed="newTask.economy.manually_changed" :allProducts="products" @updateFromProducts="updateFromProducts" />
         <Task-Creation-DatePicker v-model:recurring="newTask.recurring" v-model:date="newTask.date" v-model:startTime="newTask.start_time" v-model:endTime="newTask.end_time" />
         <Task-Creation-Location v-model:location="newTask.location" />
         <Task-Creation-Economy v-if="!newTask.service_agreement_id" v-model:economy="newTask.economy" :start="newTask.start_time" :end="newTask.end_time" :products="newTask.products" :employees="newTask.employees" :customer="newTask.customer" />
@@ -52,7 +52,9 @@ const newTask = ref({
   economy: {
     hourly_price: 0,
     fixed_price: 0,
-    invoice_hours: 1,
+    invoice_hours_customer: 0,
+    invoice_hours_employee: 0,
+    manually_changed: false,
   },
   service_agreement_id: null,
   recurring: {
@@ -137,9 +139,7 @@ const createTask = async () => {
   }).then((response) => {
     message.showComplete('Opgaven er oprettet');
     emit('created', response.tasks);
-  }).catch((error) => { 
-    console.log(error);
-  });
+  }).catch((error) => { });
 
   loading.value.create = false;
 }
@@ -175,29 +175,20 @@ const removeServiceAgreement = () => {
 }
 
 const updateFromProducts = (products) => {
-  if (!newTask.value.economy.hourly_changed) {
+  newTask.value.economy.manually_changed = false;
+
+  if (!products.length) {
     newTask.value.economy.hourly_price = 0;
-  } else if (newTask.value.economy.hourly_price === 0) {
-    newTask.value.economy.hourly_changed = false;
-  }
-
-  if (!newTask.value.economy.fixed_changed) {
     newTask.value.economy.fixed_price = 0;
-  } else if (newTask.value.economy.fixed_price === 0) {
-    newTask.value.economy.fixed_changed = false;
+    newTask.value.economy.invoice_hours_customer = 0;
+    newTask.value.economy.invoice_hours_employee = 0;
+    return;
   }
 
-  if (products.length > 0) {
-    products.forEach((product) => {
-      if (product.pricing_type === 'hourly' && !newTask.value.economy.hourly_changed) {
-        newTask.value.economy.hourly_price += product.price;
-      }
-
-      if (product.pricing_type === 'fixed' && !newTask.value.economy.fixed_changed) {
-        newTask.value.economy.fixed_price += product.price;
-      }
-    });
-  }
+  newTask.value.economy.hourly_price = products?.filter((p) => p.pricing_type === 'hourly')?.reduce((acc, product) => acc + product.price, 0);
+  newTask.value.economy.fixed_price = products?.filter((p) => p.pricing_type === 'fixed')?.reduce((acc, product) => acc + product.price, 0);
+  newTask.value.economy.invoice_hours_customer = products?.filter((p) => p.pricing_type === 'hourly')?.reduce((acc, product) => acc + product.hours, 0);
+  newTask.value.economy.invoice_hours_employee = products?.reduce((acc, product) => acc + product.hours, 0);
 }
 </script>
 <style lang="scss" scoped>

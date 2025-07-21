@@ -16,8 +16,12 @@
           <div class="text-gray-500 text-[12px] font-light" v-if="products.length === 1">Produkt valgt</div>
         </div>
       </div>
-      <div class="text-gray-700 text-[13px] leading-[15px] w-full relative" v-if="isOpen">
+      <div class="text-gray-700 text-[13px] leading-[15px] w-full relative" :class="{ 'pt-3': manually_changed }" v-if="isOpen">
         <PhCaretUp :size="16" weight="bold" class="absolute right-[10px] top-[-3px] cursor-pointer hover-transition hover:text-primary-600 active:text-primary-800 select-none" @click.stop="isOpen = false" />
+        <div v-if="manually_changed" class="p-1.5 mb-2 bg-yellow-50 rounded-[4px] flex items-center gap-x-1">
+          <PhWarning :size="16" weight="regular" class="text-yellow-500" />
+          <div class="text-yellow-500 text-[13px] font-light">Du har manuelt ændret prisen under økonomi. Dette vil overskrive priserne.</div>
+        </div>
         <div class="text-gray-700 text-[13px] font-medium leading-[15px]">Tilføj produkter</div>
         <DropdownWrite fillPlaceholder="Vælg produkt" :values="productsDropdown" :chosenValue="products" @selectValue="updateProducts" display="name" dropdownWidth="w-[500px]" :filterable="['name']" />
         <div class="mt-2" v-if="products.length">
@@ -46,10 +50,10 @@
 /******************************
  * Imports
 ******************************/
-import { ref, computed } from 'vue';
-import { PhPackage, PhCaretUp, PhSpinner, PhX } from '@phosphor-icons/vue';
+import { ref, computed, watch } from 'vue';
+import { PhPackage, PhCaretUp, PhSpinner, PhX, PhWarning } from '@phosphor-icons/vue';
 import { formatPrice } from '@/composables/Price';
-const props = defineProps(['allProducts', 'loading']);
+const props = defineProps(['allProducts', 'loading', 'manually_changed']);
 
 /******************************
  * Refs & const
@@ -69,7 +73,6 @@ const openProduct = async () => {
 
 const updateProducts = (p) => {
   products.value.push(p);
-  emit('updateFromProducts', products.value);
 }
 
 const removeProduct = (p) => {
@@ -77,10 +80,13 @@ const removeProduct = (p) => {
   if (index > -1) {
     products.value.splice(index, 1);
   }
-  emit('updateFromProducts', products.value);
 }
 
 const productsDropdown = computed(() => {
   return props.allProducts.filter(product => !products.value.some(p => p.id === product.id));
 });
+
+watch(products, (newVal) => {
+  emit('updateFromProducts', newVal);
+}, { deep: true });
 </script>

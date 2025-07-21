@@ -72,30 +72,43 @@
               <div class="text-gray-800 text-[14px] font-light mt-1">{{ tasks.activeTask.location || 'Ingen lokation tilføjet' }}</div>
             </div>
           </div>
-          <div class="flex gap-x-3 mb-1" :class="{ 'items-center !mb-2': !showEconomy }" v-if="!tasks.activeTask.service_agreement">
+          <div class="flex gap-x-3 mb-1 w-full" :class="{ 'items-center !mb-2': !showEconomy }" v-if="!tasks.activeTask.service_agreement">
             <div>
               <PhCoins :size="24" weight="regular" class="text-gray-500" />
             </div>
-            <div>
+            <div class="w-[400px]">
               <div class="flex items-center gap-x-1 cursor-pointer hover:bg-gray-200 rounded-[4px] p-1 hover-transition active:bg-gray-300 active:translate-y-[-1.5px]" @click="showEconomy = !showEconomy">
                 <div class="text-gray-800 text-[15px] font-semibold leading-[15px]">Økonomi</div>
                 <PhCaretDown :size="16" weight="bold" class="text-gray-800 hover-transition" :class="{ 'rotate-180': showEconomy }" />
               </div>
-              <div class="text-gray-600 text-[14px] font-light mt-1 flex flex-col gap-y-1" v-if="showEconomy">
-                <div>
-                  <span class="font-normal">Pris per time:</span> {{ formatPrice(tasks.activeTask.economy?.hourly_price) }} kr.
+              <div class="text-gray-600 text-[14px] font-light mt-1 flex flex-col gap-y-1 w-full" v-if="showEconomy">
+                <div class="flex justify-between">
+                  <span class="font-normal">Faktureringstimer (Kunde)</span> 
+                  <span>{{ formatPrice(tasks.activeTask.economy?.invoice_hours_customer) }} timer</span>
                 </div>
-                <div>
-                  <span class="font-normal">Fast pris:</span> {{ formatPrice(tasks.activeTask.economy?.fixed_price) }} kr.
+                <div class="flex justify-between">
+                  <span class="font-normal">Faktureringstimer (Medarbejder)</span> 
+                  <span>{{ formatPrice(tasks.activeTask.economy?.invoice_hours_employee) }} timer</span>
                 </div>
-                <div>
-                  <span class="font-normal">Lønninger:</span> {{ formatPrice(expenses) }} kr.
+                <div class="flex justify-between mt-3">
+                  <span class="font-normal">Timepris</span> 
+                  <span>{{ formatPrice(tasks.activeTask.economy?.hourly_price) }} kr.</span>
                 </div>
-                <div>
-                  <span class="font-normal">Indtjening:</span> {{ formatPrice(earnings) }} kr.
+                <div class="flex justify-between">
+                  <span class="font-normal">Fastpris</span> 
+                  <span>{{ formatPrice(tasks.activeTask.economy?.fixed_price) }} kr.</span>
                 </div>
-                <div :class="[earnings - expenses > 0 ? 'text-green-600' : 'text-red-600']">
-                  <span class="font-normal">Resultat:</span> {{ formatPrice(earnings - expenses) }} kr.
+                <div class="flex justify-between mt-3">
+                  <span class="font-normal">Lønninger</span> 
+                  <span class="text-red-500">{{ formatPrice(expenses * -1) }} kr.</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="font-normal">Indtjening</span> 
+                  <span>{{ formatPrice(earnings) }} kr.</span>
+                </div>
+                <div class="flex justify-between" :class="[earnings - expenses > 0 ? 'text-green-600' : 'text-red-600']">
+                  <span class="font-normal">Resultat</span> 
+                  <span>{{ formatPrice(earnings - expenses) }} kr.</span>
                 </div>
               </div>
             </div>
@@ -202,24 +215,16 @@ const deleteFromMethod = (method) => {
 };
 
 const earnings = computed(() => {
-  const start = moment(tasks.activeTask.start_time, 'HH:mm');
-  const end = moment(tasks.activeTask.end_time, 'HH:mm');
-  const totalHours = moment.duration(end.diff(start)).asHours();
-
-  // Calculate the earnings
-  return ((totalHours * tasks.activeTask.economy.hourly_price) + tasks.activeTask.economy.fixed_price);
+  return (((tasks.activeTask.economy.invoice_hours_customer / 100) * tasks.activeTask.economy.hourly_price) + tasks.activeTask.economy.fixed_price);
 });
 
 const expenses = computed(() => {
   let total = 0;
-  const start = moment(tasks.activeTask.start_time, 'HH:mm');
-  const end = moment(tasks.activeTask.end_time, 'HH:mm');
-  const totalHours = moment.duration(end.diff(start)).asHours();
 
   if (tasks.activeTask.employees.length) {
     tasks.activeTask.employees.forEach((employee) => {
       if (employee.payout_type === 'hourly') {
-        total += employee.payout_amount * totalHours;
+        total += employee.payout_amount * (tasks.activeTask.economy.invoice_hours_employee / 100);
       }
     });
   }

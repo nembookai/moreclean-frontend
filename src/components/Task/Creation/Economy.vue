@@ -8,29 +8,35 @@
     <div class="text-gray-700 text-[13px] leading-[15px] w-full relative" v-show="isOpen">
       <PhCaretUp :size="16" weight="bold" class="absolute right-[10px] top-[-3px] cursor-pointer hover-transition hover:text-primary-600 active:text-primary-800 select-none" @click.stop="isOpen = false" />
       <div class="text-gray-700 text-[13px] font-medium leading-[15px] mb-3">Økonomi</div>
-      <div class="flex items-center justify-between pr-10">
-        <label class="text-gray-600 text-[13px] text-nowrap">Faktureringstimer</label>
-        <div class="relative group">
-          <input type="number" class="input !h-[35px] !w-[200px] !mt-0" name="product_price" v-model="economy.hourly_price" required />
-        </div>
-      </div>
       <div class="flex items-center justify-between pr-10 mt-2">
-        <label class="text-gray-600 text-[13px] text-nowrap">Opgavepris (Timepris)</label>
+        <label class="text-gray-600 text-[13px] text-nowrap">Timepris</label>
         <div class="relative group">
-          <CurrencyInput value-scaling="precision" class="input !h-[35px] !w-[200px] !mt-0" name="product_price" @update:model-value="economy.hourly_changed = true" v-model="economy.hourly_price" required />
+          <CurrencyInput value-scaling="precision" class="input !h-[35px] !w-[200px] !mt-0" name="product_price" @update:model-value="economy.manually_changed = true" v-model="economy.hourly_price" required />
           <div class="bg-gray-300 absolute right-0 hover-transition group-hover:border border-gray-400 rounded-r-[7px] top-0 h-full w-10 flex items-center justify-center">kr.</div>
         </div>
       </div>
       <div class="flex items-center justify-between pr-10 mt-2">
-        <label class="text-gray-600 text-[13px] text-nowrap">Opgavepris (Fastpris)</label>
+        <label class="text-gray-600 text-[13px] text-nowrap">Fastpris</label>
         <div class="relative group">
-          <CurrencyInput value-scaling="precision" class="input !h-[35px] !w-[200px] !mt-0" name="product_price" @update:model-value="economy.fixed_changed = true" v-model="economy.fixed_price" required />
+          <CurrencyInput value-scaling="precision" class="input !h-[35px] !w-[200px] !mt-0" name="product_price" @update:model-value="economy.manually_changed = true" v-model="economy.fixed_price" required />
           <div class="bg-gray-300 absolute right-0 hover-transition group-hover:border border-gray-400 rounded-r-[7px] top-0 h-full w-10 flex items-center justify-center">kr.</div>
+        </div>
+      </div>
+      <div class="flex items-center justify-between pr-10 mt-2">
+        <label class="text-gray-600 text-[13px] text-nowrap">Faktureringstimer (Kunde)</label>
+        <div class="relative group">
+          <CurrencyInput value-scaling="precision" class="input !h-[35px] !w-[200px] !mt-0" name="product_price" @update:model-value="economy.manually_changed = true" v-model="economy.invoice_hours_customer" />
+        </div>
+      </div>
+      <div class="flex items-center justify-between pr-10 mt-2">
+        <label class="text-gray-600 text-[13px] text-nowrap">Faktureringstimer (Medarbejder)</label>
+        <div class="relative group">
+          <CurrencyInput value-scaling="precision" class="input !h-[35px] !w-[200px] !mt-0" name="product_price" @update:model-value="economy.manually_changed = true" v-model="economy.invoice_hours_employee" />
         </div>
       </div>
       <div class="flex items-center justify-between pr-10 mt-2">
         <div class="text-gray-600 text-[13px] text-nowrap">Lønninger</div>
-        <div class="bg-gray-100 w-[200px] cursor-not-allowed h-[35px] flex items-center justify-start pl-2.5 rounded-[7px]">{{ formatPrice(expenses) }} kr.</div>
+        <div class="bg-gray-100 w-[200px] cursor-not-allowed h-[35px] flex items-center justify-start pl-2.5 rounded-[7px] text-red-500">{{ formatPrice(expenses * -1) }} kr.</div>
       </div>
       <div class="flex items-center justify-between pr-10 mt-2">
         <div class="text-gray-600 text-[13px] text-nowrap">Indtjening</div>
@@ -63,24 +69,16 @@ const isOpen = ref(false);
  * Computed
 ******************************/
 const earnings = computed(() => {
-  const start = moment(props.start.value, 'HH:mm');
-  const end = moment(props.end.value, 'HH:mm');
-  const totalHours = moment.duration(end.diff(start)).asHours();
-
-  // Calculate the earnings
-  return ((totalHours * economy.value.hourly_price) + economy.value.fixed_price);
+  return (((economy.value.invoice_hours_customer / 100) * economy.value.hourly_price) + economy.value.fixed_price);
 });
 
 const expenses = computed(() => {
   let total = 0;
-  const start = moment(props.start.value, 'HH:mm');
-  const end = moment(props.end.value, 'HH:mm');
-  const totalHours = moment.duration(end.diff(start)).asHours();
 
   if (props.employees.length) {
     props.employees.forEach((employee) => {
       if (employee.payout_type === 'hourly') {
-        total += employee.payout_amount * totalHours;
+        total += employee.payout_amount * (economy.value.invoice_hours_employee / 100);
       }
     });
   }
