@@ -18,6 +18,7 @@
       </template>
       <template #body="{ item: product }">
         <td>{{ product.name }}</td>
+        <td>{{ formatPrice(product.hours) || '--' }} <span v-if="product.hours">timer</span></td>
         <td>{{ formatPrice(product.price) }} {{ product.pricing_type === 'hourly' ? 'kr. pr. time' : 'kr. pr. opgave' }}</td>
         <td>
           <div class="flex justify-end items-center relative">
@@ -63,6 +64,10 @@ const headers = [
   {
     name: 'Navn',
     sortable: 'name'
+  },
+  {
+    name: 'Antal timer',
+    sortable: 'hours'
   },
   {
     name: 'Pris',

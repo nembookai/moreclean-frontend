@@ -22,6 +22,10 @@
             <option value="fixed">Fast pris</option>
           </select>
         </div>
+        <div class="col-span-2">
+          <label class="text-gray-600 text-[13px]">Antal timer <span class="text-red-500">*</span></label>
+          <CurrencyInput value-scaling="precision" class="input !mt-0" name="product_price" v-model="product.hours" required />
+        </div>
         <div class="col-span-6">
           <label class="text-gray-600 text-[13px]">Produkt beskrivelse</label>
           <textarea ref="locationInput" id="adresse" autocomplete="one-time-code" v-model="product.description" class="input !mt-0" placeholder="Note" />
@@ -67,7 +71,7 @@ onBeforeMount(() => {
  * Methods
  ******************************/
 const saveProduct = async () => {
-  if (!product.value.name || !product.value.price || !product.value.pricing_type) {
+  if (!product.value.name || !product.value.pricing_type) {
     message.showError('Du skal udfylde alle felter');
     return;
   }

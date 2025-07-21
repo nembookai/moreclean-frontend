@@ -42,7 +42,10 @@
               <div class="text-gray-700 text-[15px] font-semibold leading-[15px]">Produkter</div>
               <div class="text-gray-800 text-[14px] font-light mt-1">
                 <div v-for="product in tasks.activeTask.products" :key="product.id">
-                  <span>{{ product.name }}</span>
+                  <div class="flex items-center gap-x-1">
+                    <span>{{ product.name }}</span>
+                    <span class="text-gray-500 text-[12px] font-light mt-[1.5px]">({{ formatPrice(product.hours) }} timer)</span>
+                  </div>
                 </div>
               </div>
             </div>
