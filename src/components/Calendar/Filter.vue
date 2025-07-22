@@ -38,7 +38,7 @@
         </div>
         <div class="flex justify-end items-center gap-x-4 mt-5">
           <div v-if="filteredCustomers.length || filteredEmployees.length || tasks.activeFilter.to_handle" class="text-primary-500 text-[13px] underline font-light cursor-pointer hover-transition hover:text-primary-700 active:text-primary-900" @click="resetFilter">Ryd filtrering</div>
-          <button class="btn btn__small" @click="filterTasks(false)">Filtrér opgaver</button>
+          <button class="btn btn__small" @click="filterTasks(false)">Gem & filtrer</button>
         </div>
       </div>
     </div>

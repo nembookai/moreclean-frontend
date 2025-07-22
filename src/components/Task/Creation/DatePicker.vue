@@ -17,12 +17,13 @@
         <div class="h-[37.5px] px-1 flex items-center text-sm justify-center text-gray-500 font-light bg-gray-200" :class="{ 'ml-3': !is_recurring }">kl.</div>
         <div class="relative">
           <PhClock :size="15" weight="bold" class="text-primary-600 absolute top-[11.5px] left-[10px] z-[10]" />
-          <DropdownWrite fillPlaceholder="Vælg start tidspunkt" :showArrowDropdown="false" :values="times" :chosenValue="startTime" @selectValue="(time) => startTime = time" display="value" dropdownWidth="w-[150px]" class="!mt-0" overwriteInput="!w-[100px] !pl-8 !h-[37.5px] !m-0 hover:!bg-primary-50 hover:!border-gray-200 hover:!shadow-none !transition-all !ease-in-out !duration-300" :filterable="['value']" />
+          <DropdownWrite fillPlaceholder="Vælg start tidspunkt" :showArrowDropdown="false" :values="times" :chosenValue="startTime" @selectValue="(time) => selectTime(time, 'start')" display="value" dropdownWidth="w-[150px]" class="!mt-0" overwriteInput="!w-[100px] !pl-8 !h-[37.5px] !m-0 hover:!bg-primary-50 hover:!border-gray-200 hover:!shadow-none !transition-all !ease-in-out !duration-300" :filterable="['value']" />
         </div>
         <div class="h-[37.5px] px-1 flex items-center text-sm justify-center text-gray-500 font-light bg-gray-200">til</div>
         <div class="relative">
           <PhClock :size="15" weight="bold" class="text-primary-600 absolute top-[11.5px] left-[10px] z-[10]" />
-          <DropdownWrite fillPlaceholder="Vælg slut tidspunkt" :showArrowDropdown="false" :values="times" :chosenValue="endTime" @selectValue="(time) => endTime = time" display="value" dropdownWidth="w-[150px]" class="!mt-0" overwriteInput="!w-[100px] !pl-8 !h-[37.5px] !m-0 hover:!bg-primary-50 hover:!border-gray-200 hover:!shadow-none !transition-all !ease-in-out !duration-300" :filterable="['value']" />
+          <DropdownWrite fillPlaceholder="Vælg slut tidspunkt" :showArrowDropdown="false" :values="times" :chosenValue="endTime" @selectValue="(time) => selectTime(time, 'end')" display="value" dropdownWidth="w-[150px]" class="!mt-0" overwriteInput="!w-[100px] !pl-8 !h-[37.5px] !m-0 hover:!bg-primary-50 hover:!border-gray-200 hover:!shadow-none !transition-all !ease-in-out !duration-300" :filterable="['value']" />
+          <div v-if="!endChanged" class="text-[11px] text-gray-500 font-light">2 timer automatisk</div>
         </div>
       </div>
       <LayoutComponents-Toggle class="mt-3" v-model="recurring.enabled" text="Gentagelse" small v-if="!is_recurring" />
@@ -82,6 +83,7 @@ const props = defineProps(['is_recurring']);
 const date = defineModel('date');
 const startTime = defineModel('startTime');
 const endTime = defineModel('endTime');
+const endChanged = ref(false);
 const isOpen = ref(false);
 const recurring = defineModel('recurring');
 const daysOfWeek = ['Man', 'Tir', 'Ons', 'Tor', 'Fre', 'Lør', 'Søn'];
@@ -135,6 +137,19 @@ const getRecurrencePreview = () => {
   }
 
   return text;
+}
+
+const selectTime = (time, type) => {
+  if (type === 'start') {
+    startTime.value = time;
+
+    if (!endChanged.value) {
+      endTime.value = { value: moment(time.value, 'HH:mm').clone().add(2, 'hours').format('HH:mm') };
+    }
+  } else {
+    endTime.value = time;
+    endChanged.value = true;
+  }
 }
 
 /******************************
