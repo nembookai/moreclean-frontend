@@ -21,12 +21,14 @@ import { ref, provide, onMounted, onBeforeUnmount } from 'vue';
 import { Message } from '@/store/message';
 import { Loading } from '@/store/loading';
 import { Auth } from '@/store/auth';
+import { Company } from '@/store/company';
 
 /******************************
  * Refs
 ******************************/
 const message = Message();
 const loading = Loading();
+const company = Company();
 const auth = Auth();
 const urlSavings = ref([]);
 const menuIsHidden = ref(localStorage.getItem('hide-menu') === 'true' ? true : false);
@@ -41,6 +43,7 @@ provide('urlSavings', urlSavings.value)
 /******************************
  * Lifecycle
 ******************************/
+company.init();
 
 /******************************
  * Methods and functions

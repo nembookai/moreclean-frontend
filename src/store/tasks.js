@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import moment from 'moment';
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { Calendar } from '@/store/calendar';
 import { axiosClient } from '@/lib/axiosClient';
 import { Message } from '@/store/message';
@@ -13,17 +13,22 @@ export const Tasks = defineStore('tasks', () => {
   const activeTask = ref(null);
   const prefillTask = ref({});
   const draggingTaskId = ref(null);
+  const activeFilter = ref({
+    customers: [],
+    employees: [],
+    to_handle: false
+  })
 
   function groupedTasks(day) {
     const dayStr = day.format('YYYY-MM-DD');
     const dayTasks = [];
     const groups = [];
 
-    if (!tasks.value || !tasks.value?.[dayStr]) {
+    if (!filteredTasks.value || !filteredTasks.value?.[dayStr]) {
       return [];
     }
   
-    for (const task of tasks.value[dayStr]) {
+    for (const task of filteredTasks.value[dayStr]) {
       const taskDate = task.date;
       const start = moment(`${task.date} ${task.start_time}`, 'YYYY-MM-DD HH:mm');
       let end = moment(`${task.date} ${task.end_time}`, 'YYYY-MM-DD HH:mm');
@@ -65,11 +70,11 @@ export const Tasks = defineStore('tasks', () => {
     const dayStr = day.format('YYYY-MM-DD');
     const dayTasks = [];
 
-    if (!tasks.value || !tasks.value?.[dayStr]) {
+    if (!filteredTasks.value || !filteredTasks.value?.[dayStr]) {
       return [];
     }
   
-    for (const task of tasks.value[dayStr]) {
+    for (const task of filteredTasks.value[dayStr]) {
       const taskDate = task.date;
       const start = moment(`${task.date} ${task.start_time}`, 'YYYY-MM-DD HH:mm');
       let end = moment(`${task.date} ${task.end_time}`, 'YYYY-MM-DD HH:mm');
@@ -202,6 +207,36 @@ export const Tasks = defineStore('tasks', () => {
       activeTask.value = task;
     }
   }
+
+  const filteredTasks = computed(() => {
+    const result = {};
   
-  return { tasks, groupedTasks, tasksListView, showTaskCreation, addTask, activeTask, deleteTask, updateTask, createFromDate, prefillTask, handleDrop, draggingTaskId, updateTaskBackend, setActiveTask }
+    for (const [date, taskList] of Object.entries(tasks.value)) {
+      const filteredList = taskList.filter(task => {
+        if ( activeFilter.value.customers.length && !task.customers?.some(taskCustomer => activeFilter.value.customers.some(filterCustomer => filterCustomer.id === taskCustomer.id))) {
+          return false;
+        }
+  
+        // Filter by employees
+        if (activeFilter.value.employees.length && !task.employees?.some(taskEmployee => activeFilter.value.employees.some(filterEmployee => filterEmployee.id === taskEmployee.id))) {
+          return false;
+        }
+  
+        // Filter by "to handle" (no employees assigned)
+        if (activeFilter.value.to_handle && task.employees?.length) {
+          return false;
+        }
+  
+        return true;
+      });
+  
+      if (filteredList.length) {
+        result[date] = filteredList;
+      }
+    }
+  
+    return result;
+  });
+  
+  return { tasks, groupedTasks, tasksListView, showTaskCreation, addTask, activeTask, deleteTask, updateTask, createFromDate, prefillTask, handleDrop, draggingTaskId, updateTaskBackend, setActiveTask, filteredTasks, activeFilter }
 });

@@ -11,7 +11,7 @@
     <div class="flex">
       <div v-for="(day, dayIndex) in days" :key="day" class="w-[14.28%] border-r border-gray-100 relative">
         <div class="w-full bg-white min-h-[500px] p-[2px] flex flex-col gap-y-1">
-          <Calendar-Task v-for="(task, index) in tasks.tasks[day.format('YYYY-MM-DD')]" :key="task.id" :task="task" :dayIndex="dayIndex" />
+          <Calendar-Task v-for="(task, index) in tasks.filteredTasks[day.format('YYYY-MM-DD')]" :key="task.id" :task="task" :dayIndex="dayIndex" />
         </div>
       </div>
     </div>

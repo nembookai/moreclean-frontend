@@ -1,9 +1,9 @@
 <template>
   <div>    
     <div class="grid grid-cols-6 gap-2">
-      <Task-Creation-Customer v-model:customer="newTask.customer" :lastCustomerNumber="lastCustomerNumber" :prefillServiceAgreement="newTask.service_agreement" :loading="loading.customers" :allCustomers="customers" @updateFromCustomer="updateFromCustomer" @removeServiceAgreement="removeServiceAgreement" />
-      <Task-Creation-Employees v-model:employees="newTask.employees" :loading="loading.employees" :allEmployees="employees" />
-      <Task-Creation-Products v-model:products="newTask.products" :loading="loading.products" :manually_changed="newTask.economy.manually_changed" :allProducts="products" @updateFromProducts="updateFromProducts" />
+      <Task-Creation-Customer v-model:customer="newTask.customer" :lastCustomerNumber="company.lastCustomerNumber" :prefillServiceAgreement="newTask.service_agreement" :loading="company.loading.customers" :allCustomers="company.customers" @updateFromCustomer="updateFromCustomer" @removeServiceAgreement="removeServiceAgreement" />
+      <Task-Creation-Employees v-model:employees="newTask.employees" :loading="company.loading.employees" :allEmployees="company.employees" />
+      <Task-Creation-Products v-model:products="newTask.products" :loading="company.loading.products" :manually_changed="newTask.economy.manually_changed" :allProducts="company.products" @updateFromProducts="updateFromProducts" />
       <Task-Creation-DatePicker v-model:recurring="newTask.recurring" :is_recurring="!!task.recurring_id" v-model:date="newTask.date" v-model:startTime="newTask.start_time" v-model:endTime="newTask.end_time" />
       <Task-Creation-Location v-model:location="newTask.location" />
       <Task-Creation-Economy v-if="!newTask.service_agreement_id" v-model:economy="newTask.economy" :start="newTask.start_time" :end="newTask.end_time" :products="newTask.products" :employees="newTask.employees" :customer="newTask.customer" />
@@ -15,13 +15,13 @@
     </div>
     <div class="flex items-center gap-x-5 mt-5 justify-end">
       <div class="text-gray-500 text-[15px] cursor-pointer underline underline-offset-2 font-light hover-transition hover:opacity-80 active:opacity-100 active:translate-y-[-1.5px]" @click="emit('close')">Annuller</div>
-      <button class="btn btn__green" :disabled="loading.edit" v-if="!newTask.recurring?.enabled" @click="editTask(1)">
-        <span v-if="!loading.edit">Gem opgaven</span>
+      <button class="btn btn__green" :disabled="loading" v-if="!newTask.recurring?.enabled" @click="editTask(1)">
+        <span v-if="!loading">Gem opgaven</span>
         <span v-else>Gemmer opgaven...</span>
       </button>
       <div class="relative">
-        <button class="btn btn__green" :disabled="loading.edit" v-if="newTask.recurring?.enabled" @click="showEditRecurring = !showEditRecurring">
-          <div class="flex items-center gap-x-1" v-if="!loading.edit">Gem opgaven <PhCaretDown :size="16" weight="bold" class="hover-transition" :class="{ 'rotate-180': showEditRecurring }" /></div>
+        <button class="btn btn__green" :disabled="loading" v-if="newTask.recurring?.enabled" @click="showEditRecurring = !showEditRecurring">
+          <div class="flex items-center gap-x-1" v-if="!loading">Gem opgaven <PhCaretDown :size="16" weight="bold" class="hover-transition" :class="{ 'rotate-180': showEditRecurring }" /></div>
           <div class="flex items-center gap-x-1" v-else>Gemmer gentagelse...</div>
         </button>
         <transition name="dropdown">
@@ -49,6 +49,7 @@
 import { ref, inject, onBeforeMount } from 'vue';
 import { axiosClient } from '@/lib/axiosClient';
 import { PhCaretDown, PhPen } from '@phosphor-icons/vue';
+import { Company } from '@/store/company';
 const props = defineProps(['task']);
 
 /******************************
@@ -56,16 +57,8 @@ const props = defineProps(['task']);
 ******************************/
 const message = inject('message');
 const emit = defineEmits(['close', 'updated']);
-const customers = ref([]);
-const employees = ref([]);
-const products = ref([]);
-const lastCustomerNumber = ref(0);
-const loading = ref({
-  edit: false,
-  customers: true,
-  employees: true,
-  products: true,
-});
+const company = Company();
+const loading = ref(false);
 const newTask = ref({
   ...props.task,
   start_time: props.task.start_time ? { value: props.task.start_time } : null,
@@ -92,7 +85,7 @@ const editTask = async (method) => {
     return;
   }
 
-  loading.value.edit = true;
+  loading.value = true;
 
   if (!newTask.value.date) {
     newTask.value.date = moment().format('YYYY-MM-DD');
@@ -122,7 +115,7 @@ const editTask = async (method) => {
     emit('close');
   }).catch((error) => {  });
 
-  loading.value.edit = false;
+  loading.value = false;
 }
 
 const updateFromCustomer = (customer) => {
@@ -171,29 +164,6 @@ const updateFromProducts = (products) => {
   newTask.value.economy.invoice_hours_customer = products?.filter((p) => p.pricing_type === 'hourly')?.reduce((acc, product) => acc + product.hours, 0);
   newTask.value.economy.invoice_hours_employee = products?.reduce((acc, product) => acc + product.hours, 0);
 }
-/******************************
- * Lifecycle hooks
-******************************/
-onBeforeMount(async () => {
-  await axiosClient.get('customers?per_page=100000').then((response) => {
-    customers.value = response.pageData?.data || [];
-    lastCustomerNumber.value = response.lastCustomerNumber;
-  }).catch((e) => { });
-
-  loading.value.customers = false;
-
-  await axiosClient.get('employees?per_page=100000').then((response) => {
-    employees.value = response.pageData?.data || [];
-  }).catch((e) => { });
-
-  loading.value.employees = false;
-
-  await axiosClient.get('products?per_page=100000').then((response) => {
-    products.value = response.pageData?.data || [];
-  }).catch((e) => { });
-
-  loading.value.products = false;
-});
 </script>
 <style lang="scss" scoped>
 :deep(.ql-editor) {

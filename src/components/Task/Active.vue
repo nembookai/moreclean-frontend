@@ -6,7 +6,7 @@
 
     <div class="bg-[#f8f8f8] rounded-[8px] my-[48px] drop-shadow z-[210] w-[600px] relative" ref="modal">
       <div class="py-3 px-5 border-b flex items-center justify-between gap-x-2 rounded-t-[8px]" :class="textColorWhiteOrBlack(tasks.activeTask.color)" :style="{ backgroundColor: tasks.activeTask.color }">
-        <div class="flex-1 text-[22.5px] font-normal">{{ tasks.activeTask.title }}</div>
+        <div class="flex-1 text-[22.5px] font-normal line-clamp-1">{{ tasks.activeTask.title }}</div>
         <PhX :size="30" weight="bold" class="p-1 w-[30px] hover:opacity-80 cursor-pointer hover-transition" @click.stop="closeModal" />
       </div>
       <template v-if="!showEditTask">

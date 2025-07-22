@@ -41,17 +41,14 @@
         </div>
       </div>
       <div class="flex items-center">
-        <div class="relative group">
-          <div class="cursor-pointer hover:bg-gray-200 h-[40px] w-[40px] flex items-center justify-center hover-transition rounded-[9px]">
-            <PhMagnifyingGlass :size="22" weight="regular" class="text-gray-600" />
+        <div class="relative">
+          <div class="cursor-pointer hover:bg-gray-200 h-[40px] w-[40px] flex items-center justify-center hover-transition rounded-[9px]" @click="showFilter = !showFilter">
+            <PhFaders :size="22" weight="regular" class="text-gray-600" />
           </div>
-          <div class="absolute top-[40px] left-1/2 pointer-events-none -translate-x-1/2 -translate-y-1/2 !text-[11px] py-0.5 px-2 rounded-full bg-gray-700 text-white scale-0 hover-transition group-hover:scale-[85%] hover-transition text-nowrap delay-0 group-hover:delay-150">Søg</div>
-        </div>
-        <div class="relative group">
-          <div class="cursor-pointer hover:bg-gray-200 h-[40px] w-[40px] flex items-center justify-center hover-transition rounded-[9px]">
-            <PhGear :size="22" weight="regular" class="text-gray-600" />
-          </div>
-          <div class="absolute top-[40px] left-1/2 pointer-events-none -translate-x-1/2 -translate-y-1/2 !text-[11px] py-0.5 px-2 rounded-full bg-gray-700 text-white scale-0 hover-transition group-hover:scale-[85%] hover-transition text-nowrap delay-0 group-hover:delay-150">Indstillinger</div>
+          <div class="absolute top-[40px] left-1/2 select-none pointer-events-none -translate-x-1/2 -translate-y-1/2 !text-[11px] py-0.5 px-2 rounded-full bg-gray-700 text-white scale-0 hover-transition group-hover:scale-[85%] hover-transition text-nowrap delay-0 group-hover:delay-150 z-[10]" v-if="!showFilter">Filtrér opgaver</div>
+          <transition name="dropdown">
+            <Calendar-Filter class="absolute z-[100] right-0" v-click-outside="() => showFilter = false" @search="showFilter = false" v-if="showFilter" />
+          </transition>
         </div>
         <div :class="[menuBox]" class="h-[40px] ml-2 py-3 px-0.5 text-primary-800 flex items-center justify-center relative">
           <div class="h-[35px] bg-primary-500 rounded-[6px] absolute hover-transition" :class="[calendar.activeView === 1 ? 'w-[48px] left-[2px]' : calendar.activeView === 2 ? 'w-[55px] left-[52px]' : calendar.activeView === 3 ? 'w-[55px] left-[110px]' : 'w-[70px] left-[170.5px]']"></div>
@@ -69,7 +66,7 @@
 ******************************/
 import moment from 'moment';
 import { ref, computed } from 'vue';
-import { PhCalendarDots, PhCaretLeft, PhCaretRight, PhGear, PhMagnifyingGlass, PhPlus, PhListNumbers } from '@phosphor-icons/vue';
+import { PhCalendarDots, PhCaretLeft, PhCaretRight, PhPlus, PhListNumbers, PhFaders } from '@phosphor-icons/vue';
 import { Calendar } from '@/store/calendar';
 import { Tasks } from '@/store/tasks';
 import { da } from 'date-fns/locale';
@@ -81,6 +78,7 @@ const tasks = Tasks();
 const calendar = Calendar();
 const viewDatePicker = ref(false);
 const emit = defineEmits(['viewChanged']);
+const showFilter = ref(false);
 
 /******************************
  * Style classes

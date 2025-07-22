@@ -2,7 +2,7 @@
   <LayoutComponents-Title title="Kunder" />
 
   <ModalShow :condition="openCreateCustomer">
-    <Customer-Create @close="openCreateCustomer = false" :lastCustomerNumber="lastCustomerNumber" :prefill="activeCustomer" @updated="updateCustomer" @created="createCustomer" />
+    <Customer-Create @close="openCreateCustomer = false" :lastCustomerNumber="company.lastCustomerNumber" :prefill="activeCustomer" @updated="updateCustomer" @created="createCustomer" />
   </ModalShow>
 
   <ModalShow :condition="deleteSure">
@@ -10,7 +10,7 @@
   </ModalShow>
 
   <ModalShow :condition="serviceAgreement">
-    <ServiceAgreement-Create @close="serviceAgreement = null" :products="products" :customer="serviceAgreement" @saved="saveServiceAgreement" @deleted="deleteServiceAgreement" />
+    <ServiceAgreement-Create @close="serviceAgreement = null" :products="company.products" :customer="serviceAgreement" @saved="saveServiceAgreement" @deleted="deleteServiceAgreement" />
   </ModalShow>
 
   <div class="mt-5 box" v-if="!loading.loading">
@@ -91,6 +91,7 @@
 import { ref, onBeforeMount, inject } from 'vue';
 import { axiosClient } from '@/lib/axiosClient'
 import { PhCaretDown, PhEye, PhPen, PhBackspace, PhPlus, PhCalendar } from '@phosphor-icons/vue';
+import { Company } from '@/store/company';
 
 /*******************************
 * Refs & variables
@@ -120,10 +121,9 @@ const headers = [
 ];
 const activeCustomer = ref(null);
 const openCreateCustomer = ref(false);
-const lastCustomerNumber = ref(0);
 const deleteSure = ref(null);
 const serviceAgreement = ref(null);
-const products = ref(null);
+const company = Company();
 
 /*******************************
 * Lifecycle hooks
@@ -133,11 +133,6 @@ onBeforeMount(async () => {
 
   await axiosClient.get('/customers').then((response) => {
     customerData.value = response.pageData;
-    lastCustomerNumber.value = response.lastCustomerNumber;
-  }).catch((e) => { });
-
-  await axiosClient.get('/products?per_page=100000').then((response) => {
-    products.value = response.pageData?.data || [];
   }).catch((e) => { });
 
   loading.reset();
@@ -163,7 +158,7 @@ const updateCustomer = (customer) => {
 const createCustomer = (customer) => {
   customerData.value.data.unshift(customer);
   openCreateCustomer.value = false;
-  lastCustomerNumber.value += 1;
+  company.addToLastCustomerNumber();
 };
 
 const deleteCustomer = async () => {

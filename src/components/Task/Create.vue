@@ -5,9 +5,9 @@
     </template>
     <template #content>
       <div class="grid grid-cols-6 gap-2.5">
-        <Task-Creation-Customer v-model:customer="newTask.customer" :lastCustomerNumber="lastCustomerNumber" :loading="loading.customers" :allCustomers="customers" @updateFromCustomer="updateFromCustomer" @removeServiceAgreement="removeServiceAgreement" />
-        <Task-Creation-Employees v-model:employees="newTask.employees" :loading="loading.employees" :allEmployees="employees" />
-        <Task-Creation-Products v-model:products="newTask.products" :loading="loading.products" :manually_changed="newTask.economy.manually_changed" :allProducts="products" @updateFromProducts="updateFromProducts" />
+        <Task-Creation-Customer v-model:customer="newTask.customer" :lastCustomerNumber="company.lastCustomerNumber" :loading="company.loading.customers" :allCustomers="company.customers" @updateFromCustomer="updateFromCustomer" @removeServiceAgreement="removeServiceAgreement" />
+        <Task-Creation-Employees v-model:employees="newTask.employees" :loading="company.loading.employees" :allEmployees="company.employees" />
+        <Task-Creation-Products v-model:products="newTask.products" :loading="company.loading.products" :manually_changed="newTask.economy.manually_changed" :allProducts="company.products" @updateFromProducts="updateFromProducts" />
         <Task-Creation-DatePicker v-model:recurring="newTask.recurring" v-model:date="newTask.date" v-model:startTime="newTask.start_time" v-model:endTime="newTask.end_time" />
         <Task-Creation-Location v-model:location="newTask.location" />
         <Task-Creation-Economy v-if="!newTask.service_agreement_id" v-model:economy="newTask.economy" :start="newTask.start_time" :end="newTask.end_time" :products="newTask.products" :employees="newTask.employees" :customer="newTask.customer" />
@@ -18,8 +18,8 @@
         </div>
       </div>
       <div class="flex mt-5 justify-end">
-        <button class="btn btn__green" :disabled="loading.create" @click="createTask">
-          <span v-if="!loading.create">Gem opgave</span>
+        <button class="btn btn__green" :disabled="loading" @click="createTask">
+          <span v-if="!loading">Gem opgave</span>
           <span v-else>Gemmer opgaven...</span>
         </button>
       </div>
@@ -30,12 +30,13 @@
 /******************************
  * Imports & props
 ******************************/
-import { ref, inject, onBeforeMount } from 'vue';
+import { ref, inject } from 'vue';
 import moment from 'moment';
 import { axiosClient } from '@/lib/axiosClient';
 import { Tasks } from '@/store/tasks';
 import { Calendar } from '@/store/calendar';
 import { taskColors } from '@/composables/globalHelper';
+import { Company } from '@/store/company';
 
 /******************************
  * Refs
@@ -64,42 +65,10 @@ const newTask = ref({
     weekly_days: [ moment(tasks.prefillTask.date).isoWeekday() - 1 ],
   },
 });
-const customers = ref([]);
-const employees = ref([]);
-const products = ref([]);
-const lastCustomerNumber = ref(0);
-const loading = ref({
-  create: false,
-  customers: true,
-  employees: true,
-  products: true,
-});
+const loading = ref(false);
 const emit = defineEmits(['close', 'created']);
 const message = inject('message');
-
-/******************************
- * Lifecycle hooks
-******************************/
-onBeforeMount(async () => {
-  await axiosClient.get('customers?per_page=100000').then((response) => {
-    lastCustomerNumber.value = response.lastCustomerNumber
-    customers.value = response.pageData?.data || [];
-  }).catch((e) => { });
-
-  loading.value.customers = false;
-
-  await axiosClient.get('employees?per_page=100000').then((response) => {
-    employees.value = response.pageData?.data || [];
-  }).catch((e) => { });
-
-  loading.value.employees = false;
-
-  await axiosClient.get('products?per_page=100000').then((response) => {
-    products.value = response.pageData?.data || [];
-  }).catch((e) => { });
-
-  loading.value.products = false;
-});
+const company = Company();
 
 /******************************
  * Methods
@@ -120,7 +89,7 @@ const createTask = async () => {
     return;
   }
   
-  loading.value.create = true;
+  loading.value = true;
 
   if (!newTask.value.date) {
     newTask.value.date = moment().format('YYYY-MM-DD');
@@ -136,7 +105,7 @@ const createTask = async () => {
     emit('created', response.tasks);
   }).catch((error) => { });
 
-  loading.value.create = false;
+  loading.value = false;
 }
 
 const updateFromCustomer = (customer) => {
