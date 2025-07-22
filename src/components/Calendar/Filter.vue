@@ -4,9 +4,6 @@
       <div class="bg-gray-100 p-2 rounded-t-md text-gray-600 font-light">Filtrér opgaver</div>
       <div class="p-5 flex flex-col gap-y-5">
         <div>
-          <div class="text-[13px] font-light text-primary-800 underline cursor-pointer" @click="filterTasks(true)">Søg efter opgaver til håndtering</div>
-        </div>
-        <div>
           <div class="text-[13px] font-light">Søg efter kunde</div>
           <DropdownWrite fillPlaceholder="Vælg kunde" :values="customerDropdown" :chosenValue="filteredCustomers" @selectValue="selectCustomer" display="name" dropdownWidth="w-[350px]" :filterable="['number', 'name']" />
           <div class="mt-2" v-if="filteredCustomers.length">
@@ -19,9 +16,9 @@
             </div>
           </div>
         </div>
-        <div>
+        <div v-if="!toHandle">
           <div class="text-[13px] font-light">Søg efter medarbejder</div>
-          <DropdownWrite fillPlaceholder="Vælg medarbejder" :values="employeeDropdown" :chosenValue="filteredEmployees" @selectValue="selectEmployee" display="name" dropdownWidth="w-[350px]" :filterable="['name']" />
+          <DropdownWrite fillPlaceholder="Vælg medarbejder" :values="[{ id: 0, name: 'Opgaver til håndtering', handle: true }, ...employeeDropdown]" :chosenValue="filteredEmployees" @selectValue="selectEmployee" display="name" dropdownWidth="w-[350px]" :filterable="['name']" />
           <div class="mt-2" v-if="filteredEmployees.length">
             <div class="text-gray-500 text-[12px] font-light">Medarbejdere valgt</div>
             <div class="flex flex-col gap-1.5">
@@ -30,6 +27,13 @@
                 <PhX :size="16" weight="regular" class="text-red-500 cursor-pointer hover-transition hover:text-red-700 active:text-red-900" @click.stop="removeEmployee(e)" />
               </div>
             </div>
+          </div>
+        </div>
+        <div v-else>
+          <div class="text-[13px] font-light">Søg efter medarbejder</div>
+          <div class="text-gray-800 text-[14px] flex items-center gap-x-1 mt-1.5">
+            Opgaver til håndtering valgt
+            <PhX :size="16" weight="regular" class="text-red-500 cursor-pointer hover-transition hover:text-red-700 active:text-red-900" @click.stop="toHandle = false" />
           </div>
         </div>
         <div class="flex justify-end items-center gap-x-4 mt-5">
@@ -61,6 +65,7 @@ const filteredCustomers = ref([
 const filteredEmployees = ref([
   ...tasks.activeFilter.employees
 ]);
+const toHandle = ref(tasks.activeFilter.to_handle);
 
 /******************************
  * Methods
@@ -70,7 +75,13 @@ const selectCustomer = (customer) => {
 }
 
 const selectEmployee = (employee) => {
-  filteredEmployees.value.push(employee);
+  if (employee.handle) {
+    toHandle.value = true;
+    filteredEmployees.value = [];
+  } else {
+    toHandle.value = false;
+    filteredEmployees.value.push(employee);
+  }
 }
 
 const removeEmployee = (employee) => {
@@ -97,15 +108,10 @@ const employeeDropdown = computed(() => {
   return allEmployees;
 })
 
-const filterTasks = (to_handle = false) => {
-  if (to_handle) {
-    tasks.activeFilter.customers = [];
-    tasks.activeFilter.employees = [];
-    tasks.activeFilter.to_handle = true;
-  } else {
-    tasks.activeFilter.customers = filteredCustomers.value;
-    tasks.activeFilter.employees = filteredEmployees.value;
-  }
+const filterTasks = () => {
+  tasks.activeFilter.customers = filteredCustomers.value;
+  tasks.activeFilter.employees = filteredEmployees.value;
+  tasks.activeFilter.to_handle = toHandle.value;
 
   emit('search');
 }

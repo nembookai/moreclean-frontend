@@ -42,8 +42,9 @@
       </div>
       <div class="flex items-center">
         <div class="relative">
-          <div class="cursor-pointer hover:bg-gray-200 h-[40px] w-[40px] flex items-center justify-center hover-transition rounded-[9px]" @click="showFilter = !showFilter">
-            <PhFaders :size="22" weight="regular" class="text-gray-600" />
+          <div class="cursor-pointer hover:bg-gray-200 h-[40px] w-[40px] flex items-center justify-center hover-transition rounded-[9px] relative" @click="showFilter = !showFilter">
+            <PhFaders :size="22" weight="regular" :class="[filterLength ? 'text-primary-500' : 'text-gray-600']" />
+            <div class="absolute bg-primary-600 w-[15px] top-[2.5px] right-[2.5px] h-[15px] rounded-full text-[10px] text-white flex items-center justify-center" v-if="filterLength">{{ filterLength }}</div>
           </div>
           <div class="absolute top-[40px] left-1/2 select-none pointer-events-none -translate-x-1/2 -translate-y-1/2 !text-[11px] py-0.5 px-2 rounded-full bg-gray-700 text-white scale-0 hover-transition group-hover:scale-[85%] hover-transition text-nowrap delay-0 group-hover:delay-150 z-[10]" v-if="!showFilter">Filtrér opgaver</div>
           <transition name="dropdown">
@@ -188,4 +189,22 @@ const switchDate = (direction) => {
   viewDatePicker.value = false;
   emit('viewChanged');
 }
+
+const filterLength = computed(() => {
+  let length = 0;
+
+  if (tasks.activeFilter.customers.length) {
+    length += 1;
+  }
+
+  if (tasks.activeFilter.employees.length) {
+    length += 1;
+  }
+  
+  if (tasks.activeFilter.to_handle) {
+    length += 1;
+  }
+
+  return length;
+})
 </script>
