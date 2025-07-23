@@ -4,7 +4,7 @@
       <Task-Creation-Customer v-model:customer="newTask.customer" :lastCustomerNumber="company.lastCustomerNumber" :prefillServiceAgreement="newTask.service_agreement" :loading="company.loading.customers" :allCustomers="company.customers" @updateFromCustomer="updateFromCustomer" @removeServiceAgreement="removeServiceAgreement" />
       <Task-Creation-Employees v-model:employees="newTask.employees" :loading="company.loading.employees" :allEmployees="company.employees" />
       <Task-Creation-Products v-model:products="newTask.products" :loading="company.loading.products" :manually_changed="newTask.economy.manually_changed" :allProducts="company.products" @updateFromProducts="updateFromProducts" />
-      <Task-Creation-DatePicker v-model:recurring="newTask.recurring" :is_recurring="!!task.recurring_id" v-model:date="newTask.date" v-model:startTime="newTask.start_time" v-model:endTime="newTask.end_time" />
+      <Task-Creation-DatePicker v-model:recurring="newTask.recurring" :is_recurring="task.recurring_id" v-model:date="newTask.date" v-model:startTime="newTask.start_time" v-model:endTime="newTask.end_time" />
       <Task-Creation-Location v-model:location="newTask.location" />
       <Task-Creation-Economy v-if="!newTask.service_agreement_id" v-model:economy="newTask.economy" :start="newTask.start_time" :end="newTask.end_time" :products="newTask.products" :employees="newTask.employees" :customer="newTask.customer" />
       <Task-Creation-ColorPicker v-model:color="newTask.color" />

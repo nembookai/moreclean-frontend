@@ -176,8 +176,13 @@ export const Tasks = defineStore('tasks', () => {
     }).catch((error) => { });
   }
 
-  function setActiveTask(task) {
-    activeTask.value = task;
+  function setActiveTask(task, from_id = false) {
+    if (!from_id) {
+      activeTask.value = task;
+      return;
+    }
+
+    activeTask.value = Object.values(tasks.value).flat().find(t => t.id == task);
   }
 
   const filteredTasks = computed(() => {
