@@ -99,7 +99,6 @@ const createTask = async () => {
     ...newTask.value,
     start_time: newTask.value.start_time.value,
     end_time: newTask.value.end_time.value,
-    customer_id: newTask.value.customer?.id,
   }).then((response) => {
     message.showComplete('Opgaven er oprettet');
     emit('created', response.tasks);

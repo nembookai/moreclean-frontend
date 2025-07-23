@@ -42,7 +42,7 @@ const menuItems = [
   {
     name: 'Kunder',
     icon: PhUsers,
-    route: 'customers'
+    route: 'customers.index'
   },
   {
     name: 'Produkter',

@@ -108,7 +108,6 @@ const editTask = async (method) => {
     ...newTask.value,
     start_time: newTask.value.start_time?.value || null,
     end_time: newTask.value.end_time?.value || null,
-    customer_id: newTask.value.customer?.id,
   }).then((response) => {
     message.showComplete('Opgaven er opdateret');
     emit('updated', response.tasks);

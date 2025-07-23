@@ -2,10 +2,12 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import unauthorizedRoutes from './unauthorized';
 import singleRoutes from './single';
+import customerRoutes from './customer';
 
 const routes = [
   ...unauthorizedRoutes,
   ...singleRoutes,
+  ...customerRoutes,
   { path: '/:pathMatch(.*)*', name: 'notFound', component: () => import('../views/NotFoundView.vue'), meta: { title: 'Siden findes ikke - MoreClean' } },
 ]
 

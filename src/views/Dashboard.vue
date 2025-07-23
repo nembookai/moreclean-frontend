@@ -4,10 +4,6 @@
       <Task-Create @close="tasks.showTaskCreation = false; tasks.prefillTask = {};" @created="addNewTasks" />
     </ModalShow>
 
-    <ModalShow :condition="tasks.activeTask">
-      <Task-Active @close="tasks.activeTask = null" />
-    </ModalShow>
-
     <div class="overflow-y-auto max-h-[calc(100vh-50px)] mt-5 pr-3" ref="calendarContainer" v-if="!loading.loading">
       <Calendar-Menu class="sticky top-0 z-[20]" @viewChanged="viewChanged" />
       <Calendar-Views-Week class="flex-1" v-if="calendar.activeView === 3" @viewChanged="viewChanged" />

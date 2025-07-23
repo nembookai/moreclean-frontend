@@ -4,6 +4,9 @@
   </template>
   <template v-else>
     <Layout-Loading v-if="loading.loading"/>
+    <ModalShow :condition="tasks.activeTask">
+      <Task-Active @close="tasks.activeTask = null" />
+    </ModalShow>
     <Layout-SideNavigation @hide="hide" />
     <div class="hover-transition" :class="menuIsHidden ? 'content' : 'bigger-content'">
       <router-view :key="$route.fullPath" />
@@ -22,6 +25,7 @@ import { Message } from '@/store/message';
 import { Loading } from '@/store/loading';
 import { Auth } from '@/store/auth';
 import { Company } from '@/store/company';
+import { Tasks } from '@/store/tasks';
 
 /******************************
  * Refs
@@ -30,6 +34,7 @@ const message = Message();
 const loading = Loading();
 const company = Company();
 const auth = Auth();
+const tasks = Tasks();
 const urlSavings = ref([]);
 const menuIsHidden = ref(localStorage.getItem('hide-menu') === 'true' ? true : false);
 

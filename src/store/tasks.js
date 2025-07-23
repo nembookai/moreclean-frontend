@@ -151,10 +151,6 @@ export const Tasks = defineStore('tasks', () => {
   async function handleDrop(task, day, time = null) {
     let taskInFocus = task.data;
   
-    if (taskInFocus.overlaps) {
-      taskInFocus = taskInFocus.original_task;
-    }
-  
     tasks.value[taskInFocus.date] = tasks.value[taskInFocus.date].filter(t => t.id !== taskInFocus.id);
   
     // Set new date
@@ -166,27 +162,7 @@ export const Tasks = defineStore('tasks', () => {
       taskInFocus.start_time = newStart.format('HH:mm');
       taskInFocus.end_time = newStart.clone().add(taskInFocus.duration, 'minutes').format('HH:mm');
     }
-  
-    // Recalculate overlapping regardless of time change
-    const startDateTime = moment(`${taskInFocus.date} ${taskInFocus.start_time}`, 'YYYY-MM-DD HH:mm');
-    let endDateTime = moment(`${taskInFocus.date} ${taskInFocus.end_time}`, 'YYYY-MM-DD HH:mm');
 
-    if (endDateTime.isSameOrBefore(startDateTime)) {
-      endDateTime.add(1, 'day');
-    }
-
-    const overlapStart = moment(taskInFocus.date).clone().add(1, 'day').startOf('day');
-    const overlapDuration = endDateTime.diff(overlapStart, 'minutes');
-
-    taskInFocus.overlapping = overlapDuration > 0
-      ? {
-          date: overlapStart.format('YYYY-MM-DD'),
-          start_time: '00:00',
-          end_time: endDateTime.format('HH:mm'),
-          duration: overlapDuration,
-        }
-      : null;
-  
     await updateTaskBackend(taskInFocus, (tasks) => {
       taskInFocus.title = tasks[0].title;
       addTask(taskInFocus);
@@ -201,11 +177,7 @@ export const Tasks = defineStore('tasks', () => {
   }
 
   function setActiveTask(task) {
-    if (task.overlaps) {
-      activeTask.value = task.original_task;
-    } else {
-      activeTask.value = task;
-    }
+    activeTask.value = task;
   }
 
   const filteredTasks = computed(() => {
