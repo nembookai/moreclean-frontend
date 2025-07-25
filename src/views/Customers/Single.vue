@@ -47,6 +47,10 @@
                 <div class="text-sm text-gray-600 font-light">Email</div>
                 <div class="font-light text-gray-700">{{ customer.email || '---' }}</div>
               </div>
+              <div class="mb-4" v-if="customer.type === 'company'">
+                <div class="text-sm text-gray-600 font-light">Fakturerings e-mail</div>
+                <div class="font-light text-gray-700">{{ customer.invoice_email || '---' }}</div>
+              </div>
               <div class="mb-4">
                 <div class="text-sm text-gray-600 font-light">Telefon</div>
                 <div class="font-light text-gray-700">{{ customer.phone || '---' }}</div>

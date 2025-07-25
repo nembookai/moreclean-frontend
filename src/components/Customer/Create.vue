@@ -32,11 +32,15 @@
           <input type="number" id="debit_number" v-model="customer.debit_number" class="input !mt-0" autocomplete="new-password" placeholder="Debitor nummer" />
         </div>
         <div class="col-span-full -mb-2 bg-primary-600 text-white w-fit px-2 mt-4 rounded text-[18px]">Kontaktoplysninger</div>
-        <div class="col-span-3">
+        <div :class="customer.type === 'company' ? 'col-span-2' : 'col-span-3'">
           <label class="text-gray-600 text-[13px]">E-mail</label>
           <input type="text" id="email" v-model="customer.email" class="input !mt-0" autocomplete="new-password" placeholder="E-mail" />
         </div>
-        <div class="col-span-3">
+        <div class="col-span-2" v-if="customer.type === 'company'">
+          <label class="text-gray-600 text-[13px]">Fakturerings e-mail</label>
+          <input type="text" id="email" v-model="customer.invoice_email" class="input !mt-0" autocomplete="new-password" placeholder="Fakturerings e-mail" />
+        </div>
+        <div :class="customer.type === 'company' ? 'col-span-2' : 'col-span-3'">
           <label class="text-gray-600 text-[13px]">Telefon</label>
           <input type="text" id="phone" v-model="customer.phone" class="input !mt-0" autocomplete="new-password" placeholder="Telefon" />
         </div>
