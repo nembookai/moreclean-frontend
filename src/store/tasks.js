@@ -19,6 +19,12 @@ export const Tasks = defineStore('tasks', () => {
     to_handle: false
   })
 
+  async function init() {
+    await axiosClient.get('task').then((response) => {
+      tasks.value = response.tasks;
+    }).catch((error) => { });
+  }
+
   function groupedTasks(day) {
     const dayStr = day.format('YYYY-MM-DD');
     const dayTasks = [];
@@ -99,30 +105,42 @@ export const Tasks = defineStore('tasks', () => {
   }
 
   function addTask(task) {
-    if (!tasks.value[task.date]) {
-      tasks.value[task.date] = [];
-    }
+    const date = task.date;
 
-    tasks.value[task.date].push(task);
+    if (!tasks.value[date]) {
+      tasks.value = {
+        ...tasks.value,
+        [date]: [task]
+      };
+    } else {
+      tasks.value[date].push(task);
+    }
   }
 
   async function deleteTask(task, method) {
     let id = task.recurring_id ? task.recurring_id : task.id;
 
     await axiosClient.delete(`task/${id}/${method}/${task.date}`).then((response) => {
+      if (activeTask.value.reloadOnUpdate) {
+        window.location.reload();
+        return;
+      }
+
       tasks.value[task.date] = tasks.value[task.date].filter(t => t.id !== task.id);
       activeTask.value = null;
+      
       if (task.recurring?.enabled) {
         if (method === 3 || method === 4) {
           window.location.reload();
         }
       }
+
       message.showComplete('Opgaven er blevet slettet');
     }).catch((error) => { });
   }
 
   function updateTask(allTasks) {
-    if (allTasks.length > 1) {
+    if (allTasks.length > 1 || activeTask.value.reloadOnUpdate) {
       window.location.reload();
       return;
     }
@@ -176,9 +194,9 @@ export const Tasks = defineStore('tasks', () => {
     }).catch((error) => { });
   }
 
-  function setActiveTask(task, from_id = false) {
+  function setActiveTask(task, from_id = false, reloadOnUpdate = false) {
     if (!from_id) {
-      activeTask.value = task;
+      activeTask.value = { ...task, reloadOnUpdate };
       return;
     }
 
@@ -215,5 +233,5 @@ export const Tasks = defineStore('tasks', () => {
     return result;
   });
   
-  return { tasks, groupedTasks, tasksListView, showTaskCreation, addTask, activeTask, deleteTask, updateTask, createFromDate, prefillTask, handleDrop, draggingTaskId, updateTaskBackend, setActiveTask, filteredTasks, activeFilter }
+  return { tasks, groupedTasks, tasksListView, showTaskCreation, addTask, activeTask, deleteTask, updateTask, createFromDate, prefillTask, handleDrop, draggingTaskId, updateTaskBackend, setActiveTask, filteredTasks, activeFilter, init }
 });

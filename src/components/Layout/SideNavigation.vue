@@ -52,7 +52,7 @@ const menuItems = [
   {
     name: 'Medarbejdere',
     icon: PhIdentificationBadge,
-    route: 'employees'
+    route: 'employees.index'
   }
 ];
 

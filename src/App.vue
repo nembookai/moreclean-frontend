@@ -20,12 +20,13 @@
 /******************************
  * Imports & props
 ******************************/
-import { ref, provide, onMounted, onBeforeUnmount } from 'vue';
+import { ref, provide, onMounted, onBeforeUnmount, onBeforeMount } from 'vue';
 import { Message } from '@/store/message';
 import { Loading } from '@/store/loading';
 import { Auth } from '@/store/auth';
 import { Company } from '@/store/company';
 import { Tasks } from '@/store/tasks';
+import { axiosClient } from '@/lib/axiosClient';
 
 /******************************
  * Refs
@@ -48,7 +49,14 @@ provide('urlSavings', urlSavings.value)
 /******************************
  * Lifecycle
 ******************************/
-company.init();
+onBeforeMount(async () => {
+  loading.load('Henter data');
+
+  await company.init();
+  await tasks.init();
+  
+  loading.reset();
+});
 
 /******************************
  * Methods and functions

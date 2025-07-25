@@ -18,9 +18,11 @@
       </template>
       <template #body="{ item: employee }">
         <td>
-          {{ employee.name }}
-          <div v-if="employee.type === 'subcontractor' && employee.cvr" class="text-[10px] text-gray-600">Cvr. {{ employee.cvr }}</div>
-          <div v-if="employee.type === 'employee' && employee.cvr" class="text-[10px] text-gray-600">Cpr. {{ employee.cvr }}</div>
+          <RouterLink class="w-fit inline-block hover:text-primary-600 active:text-primary-800 group" :to="{ name: 'employees.single', params: { id: employee.id } }">
+            {{ employee.name }}
+            <div v-if="employee.type === 'subcontractor' && employee.cvr" class="text-[10px] text-gray-600 group-hover:text-primary-600">Cvr. {{ employee.cvr }}</div>
+            <div v-if="employee.type === 'employee' && employee.cvr" class="text-[10px] text-gray-600 group-hover:text-primary-600">Cpr. {{ employee.cvr }}</div>
+          </RouterLink>
         </td>
         <td>
           <div>{{ employee.email || '---' }}</div>
@@ -48,6 +50,10 @@
             <transition name="dropdown">
               <LayoutComponents-HoverDropdown :freeSlot="true" class="absolute top-[30px] z-[99] right-0" @close="activeEmployee = null" v-click-outside="() => activeEmployee = null" v-if="activeEmployee?.id === employee.id" extraclass="w-[250px] max-h-[300px]">
               <template #free>
+                <div class="hover_dropdown hover_dropdown__small" @click="router.push({ name: 'employees.single', params: { id: employee.id } })">
+                  <div><PhEye :size="16" weight="fill" /></div>
+                  Se medarbejder
+                </div>
                 <div class="hover_dropdown hover_dropdown__small" @click="openCreateEmployee = true;">
                   <div><PhPen :size="16" weight="fill" /></div>
                   Rediger medarbejder
@@ -71,14 +77,16 @@
 ******************************/
 import { ref, onBeforeMount, inject } from 'vue';
 import { axiosClient } from '@/lib/axiosClient'
-import { PhCaretDown, PhPen, PhBackspace, PhPlus } from '@phosphor-icons/vue';
+import { PhCaretDown, PhPen, PhBackspace, PhPlus, PhEye } from '@phosphor-icons/vue';
 import { formatPrice } from '@/composables/Price';
+import { useRouter } from 'vue-router';
 
 /*******************************
 * Refs & variables
 ******************************/
 const message = inject('message');
 const loading = inject('loading');
+const router = useRouter();
 const employeeData = ref([]);
 const headers = [
   {

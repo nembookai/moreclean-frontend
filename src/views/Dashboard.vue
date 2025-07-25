@@ -35,18 +35,11 @@ const loading = Loading();
  * Lifecycle Hooks
 ******************************/
 onBeforeMount(async () => {
-  loading.load('Henter data');
+  await nextTick();
 
-  await axiosClient.get('task').then(async (response) => {
-    tasks.tasks = response.tasks;
-    await nextTick();
-
-    setTimeout(() => {
-      scrollToCenter();
-    }, 10);
-  }).catch((error) => { });
-  
-  loading.reset();
+  setTimeout(() => {
+    scrollToCenter();
+  }, 100);
 });
 
 /******************************

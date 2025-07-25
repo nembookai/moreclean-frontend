@@ -112,7 +112,7 @@ const editTask = async (method) => {
     message.showComplete('Opgaven er opdateret');
     emit('updated', response.tasks);
     emit('close');
-  }).catch((error) => {  });
+  }).catch((error) => { console.log(error); });
 
   loading.value = false;
 }

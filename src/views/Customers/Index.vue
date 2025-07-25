@@ -22,14 +22,14 @@
       </template>
       <template #body="{ item: customer }">
         <td>
-          <div class="flex items-center gap-x-1 cursor-pointer hover-transition hover:text-primary-600 active:text-primary-800 select-none w-fit" @click="router.push(`/customers/${customer.id}`)">
+          <div class="flex items-center gap-x-1 cursor-pointer hover-transition hover:text-primary-600 active:text-primary-800 select-none w-fit" @click="router.push({ name: 'customers.single', params: { id: customer.id } })">
             <div class="rounded-full w-[5px] h-[15px]" :style="{ backgroundColor: customer.color }"></div>
             <div class="font-medium">{{ customer.number || '---' }}</div>
           </div>
           <div class="text-[10px] text-gray-600" v-if="customer.debit_number">Debitor. {{ customer.debit_number }}</div>
         </td>
         <td>
-          <RouterLink :to="`/customers/${customer.id}`" class="hover-transition hover:text-primary-600 active:text-primary-800 select-none w-fit">{{ customer.name || '---' }}</RouterLink>
+          <RouterLink :to="{ name: 'customers.single', params: { id: customer.id } }" class="hover-transition hover:text-primary-600 active:text-primary-800 select-none w-fit">{{ customer.name || '---' }}</RouterLink>
           <div class="text-[10px] text-gray-600" v-if="customer.cvr">Cvr. {{ customer.cvr }}</div>
         </td>
         <td>
@@ -59,7 +59,7 @@
             <transition name="dropdown">
               <LayoutComponents-HoverDropdown :freeSlot="true" class="absolute top-[30px] z-[99] right-0" @close="activeCustomer = null" v-click-outside="() => activeCustomer = null" v-if="activeCustomer?.id === customer.id" extraclass="w-[250px] max-h-[300px]">
               <template #free>
-                <div class="hover_dropdown hover_dropdown__small" @click="router.push(`/customers/${customer.id}`)">
+                <div class="hover_dropdown hover_dropdown__small" @click="router.push({ name: 'customers.single', params: { id: customer.id } })">
                   <div><PhEye :size="16" weight="fill" /></div>
                   Se kunde
                 </div>

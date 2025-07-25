@@ -201,7 +201,7 @@ const deleteServiceAgreement = () => {
 
 const deleteCustomer = () => {
   axiosClient.delete(`/customers/${customer.value.id}`).then(() => {
-    router.push('/customers');
+    router.push({ name: 'customers.index' });
   }).catch((e) => { });
 }
 </script>

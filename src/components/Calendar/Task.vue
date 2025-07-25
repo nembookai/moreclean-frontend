@@ -1,7 +1,7 @@
 <template>
   <div class="text-[12px] flex flex-col h-full rounded shadow inner-shadow relative cursor-pointer group select-none hover-transition" :style="{ backgroundColor: task.color }" :class="[textColorWhiteOrBlack(task.color)]">
     <div v-if="allowResize" class="resize-handle absolute top-0 left-0 right-0 h-1.5 z-[10] cursor-n-resize" @mousedown.stop="startResizeTop(task, $event)"></div>
-    <div class="group-hover:opacity-80 p-[3px] group-active:opacity-60 hover-transition flex-1 dragHandler hover-transition" @click="tasks.setActiveTask(task)">
+    <div class="group-hover:opacity-80 p-[3px] group-active:opacity-60 hover-transition flex-1 dragHandler hover-transition" @click="tasks.setActiveTask(task, false, reloadOnUpdate)">
       <div v-if="showDate" class="font-normal">{{ moment(task.date).format('DD/MM/YYYY') }}</div>
       <div class="font-normal drop-shadow-sm flex items-center">
         <span :class="getLineClampClass()">{{ task.title }}</span>
@@ -49,8 +49,12 @@ const props = defineProps({
     default: false
   },
   lineClampOverride: {
-    type: Number,
+    type: String,
     default: null
+  },
+  reloadOnUpdate: {
+    type: Boolean,
+    default: false
   }
 });
 
