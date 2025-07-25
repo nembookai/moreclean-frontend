@@ -90,7 +90,10 @@
           <div v-if="tasks.length" class="flex flex-col gap-y-2 mt-4">
             <div class="grid grid-cols-12 gap-x-10 border-b border-gray-200 pb-2">
               <div class="col-span-4">Opgave</div>
-              <div class="col-span-8">Timer</div>
+              <div class="col-span-7 flex justify-between items-center">
+                <div>Produkt</div>
+                <div>Timer</div>
+              </div>
             </div>
             <div class="pb-10">
               <div v-for="(task, index) in tasks" :key="task.id">
@@ -98,7 +101,7 @@
                   <div class="col-span-4">
                     <Calendar-Task :showDate="true" class="!h-[40px]" :task="task" :reloadOnUpdate="true" lineClampOverride="line-clamp-2" />
                   </div>
-                  <div class="col-span-6">
+                  <div class="col-span-7">
                     <div v-for="product in task.products" :key="product.id">
                       <div class="text-sm text-gray-700 flex justify-between mt-1">
                         <div class="font-light">{{ product.name }}</div>
