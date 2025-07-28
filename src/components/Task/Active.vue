@@ -17,7 +17,11 @@
             </div>
             <div>
               <div class="text-gray-700 text-[15px] font-semibold leading-[15px]">Kunde</div>
-              <div class="text-gray-800 text-[14px] font-light flex items-center gap-x-1 mt-1"><span>({{ tasks.activeTask.customer?.number }})</span>{{ tasks.activeTask.customer?.name }}</div>
+              <div class="text-gray-800 text-[14px] font-light flex items-center gap-x-1 mt-1">
+                <span>({{ tasks.activeTask.customer?.number }})</span>{{ tasks.activeTask.customer?.name }}
+                <QuickContact type="mail" :customer="tasks.activeTask.customer" />
+                <QuickContact type="phone" :customer="tasks.activeTask.customer" />
+              </div>
               <div v-if="tasks.activeTask.service_agreement" class="bg-primary-500 text-white text-[12px] font-normal px-2 py-[3px] leading-none rounded-full mt-1">Serviceaftale: {{ tasks.activeTask.service_agreement?.name }}</div>
             </div>
           </div>
@@ -28,8 +32,10 @@
             <div>
               <div class="text-gray-700 text-[15px] font-semibold leading-[15px]">Medarbejdere</div>
               <div class="text-gray-800 text-[14px] font-light mt-1">
-                <div v-if="tasks.activeTask.employees?.length" v-for="employee in tasks.activeTask.employees" :key="employee.id">
+                <div class="flex items-center gap-x-1" v-if="tasks.activeTask.employees?.length" v-for="employee in tasks.activeTask.employees" :key="employee.id">
                   <span>{{ employee.name }}</span>
+                  <QuickContact type="mail" :customer="employee" />
+                  <QuickContact type="phone" :customer="employee" />
                 </div>
                 <div v-else class="text-gray-500 text-[14px] font-light">Ingen medarbejdere tilføjet</div>
               </div>

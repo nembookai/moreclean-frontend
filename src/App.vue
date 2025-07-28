@@ -7,6 +7,9 @@
     <ModalShow :condition="tasks.activeTask">
       <Task-Active @close="tasks.activeTask = null" />
     </ModalShow>
+    <ModalShow :condition="mail.showActiveMail">
+      <MailSender :title="mail.activeMail.subject" :body="mail.activeMail.body" :allRecipients="mail.activeMail.recipients" @close="mail.closeActiveMail()" />
+    </ModalShow>
     <Layout-SideNavigation @hide="hide" />
     <div class="hover-transition" :class="menuIsHidden ? 'content' : 'bigger-content'">
       <router-view :key="$route.fullPath" />
@@ -24,15 +27,16 @@ import { ref, provide, onMounted, onBeforeUnmount, onBeforeMount } from 'vue';
 import { Message } from '@/store/message';
 import { Loading } from '@/store/loading';
 import { Auth } from '@/store/auth';
+import { Mail } from '@/store/mail';
 import { Company } from '@/store/company';
 import { Tasks } from '@/store/tasks';
-import { axiosClient } from '@/lib/axiosClient';
 
 /******************************
  * Refs
 ******************************/
 const message = Message();
 const loading = Loading();
+const mail = Mail();
 const company = Company();
 const auth = Auth();
 const tasks = Tasks();

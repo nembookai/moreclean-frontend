@@ -18,11 +18,12 @@
       </template>
       <template #body="{ item: employee }">
         <td>
-          <RouterLink class="w-fit inline-block hover:text-primary-600 active:text-primary-800 group" :to="{ name: 'employees.single', params: { id: employee.id } }">
-            {{ employee.name }}
-            <div v-if="employee.type === 'subcontractor' && employee.cvr" class="text-[10px] text-gray-600 group-hover:text-primary-600">Cvr. {{ employee.cvr }}</div>
-            <div v-if="employee.type === 'employee' && employee.cvr" class="text-[10px] text-gray-600 group-hover:text-primary-600">Cpr. {{ employee.cvr }}</div>
-          </RouterLink>
+          <div class="flex items-center gap-x-1">
+            <RouterLink class="w-fit inline-block hover:text-primary-600 active:text-primary-800 group" :to="{ name: 'employees.single', params: { id: employee.id } }">{{ employee.name }}</RouterLink>
+            <QuickContact type="mail" :customer="employee" />
+          </div>
+          <div v-if="employee.type === 'subcontractor' && employee.cvr" class="text-[10px] text-gray-600 group-hover:text-primary-600">Cvr. {{ employee.cvr }}</div>
+          <div v-if="employee.type === 'employee' && employee.cvr" class="text-[10px] text-gray-600 group-hover:text-primary-600">Cpr. {{ employee.cvr }}</div>
         </td>
         <td>
           <div>{{ employee.email || '---' }}</div>

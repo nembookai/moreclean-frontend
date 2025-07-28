@@ -29,7 +29,10 @@
           <div class="text-[10px] text-gray-600" v-if="customer.debit_number">Debitor. {{ customer.debit_number }}</div>
         </td>
         <td>
-          <RouterLink :to="{ name: 'customers.single', params: { id: customer.id } }" class="hover-transition hover:text-primary-600 active:text-primary-800 select-none w-fit">{{ customer.name || '---' }}</RouterLink>
+          <div class="flex items-center gap-x-1">
+            <RouterLink :to="{ name: 'customers.single', params: { id: customer.id } }" class="hover-transition hover:text-primary-600 active:text-primary-800 select-none w-fit">{{ customer.name || '---' }}</RouterLink>
+            <QuickContact type="mail" :customer="customer" />
+          </div>
           <div class="text-[10px] text-gray-600" v-if="customer.cvr">Cvr. {{ customer.cvr }}</div>
         </td>
         <td>
