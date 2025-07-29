@@ -54,6 +54,15 @@
             <span v-if="customer.city">{{ customer.city }}</span>
           </div>
         </td>
+        <td class="h-full">
+          <div class="flex flex-col justify-center items-center">
+            <div v-if="customer.economic_id">
+              <PhCheck :size="22" weight="bold" class="text-green-500" />
+              <div class="text-[10px] text-gray-600">({{ customer.economic_id }})</div>
+            </div>
+            <PhX :size="22" weight="bold" class="text-red-500" v-else />
+          </div>
+        </td>
         <td>
           <div class="flex justify-end items-center relative">
             <div @click="setActiveCustomer(customer)" class="flex items-center gap-x-0.5 cursor-pointer hover-transition hover:text-primary-600 active:text-primary-800 select-none" :class="activeCustomer?.id === customer.id ? 'text-primary-700' : ''">
@@ -93,7 +102,7 @@
 ******************************/
 import { ref, onBeforeMount, inject } from 'vue';
 import { axiosClient } from '@/lib/axiosClient'
-import { PhCaretDown, PhEye, PhPen, PhBackspace, PhPlus, PhCalendar } from '@phosphor-icons/vue';
+import { PhCaretDown, PhEye, PhPen, PhBackspace, PhPlus, PhCalendar, PhCheck, PhX } from '@phosphor-icons/vue';
 import { Company } from '@/store/company';
 import { useRouter } from 'vue-router';
 
@@ -119,6 +128,10 @@ const headers = [
   },
   {
     name: 'Adresse'
+  },
+  {
+    name: 'Economic',
+    sortable: 'economic_id'
   },
   {
     name: ''

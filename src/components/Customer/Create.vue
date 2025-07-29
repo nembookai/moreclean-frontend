@@ -1,8 +1,14 @@
 <template>
   <Modal @close="$emit('close')" modalWidth="w-[700px]">
     <template #header>
-      <div class="text-[19px] font-normal text-primary-900" v-if="!customer.id">Opret ny kunde</div>
-      <div class="text-[19px] font-normal text-primary-900" v-else>Rediger kunde</div>
+      <div class="flex items-center gap-x-3" v-if="!customer.id">
+        <div class="text-[19px] font-normal text-primary-900">Opret ny kunde</div>
+        <Customer-EconomicModule :customer="customer" @update:customer="updateFromEconomicCustomer" @remove:customer="removeActiveEconomicCustomer" />
+      </div>
+      <div class="text-[19px] font-normal text-primary-900 flex items-center gap-x-3" v-else>
+        Rediger kunde
+        <Customer-EconomicModule :customer="customer" @update:customer="updateFromEconomicCustomer" @remove:customer="removeActiveEconomicCustomer" />
+      </div>
     </template>
     <template #content>
       <div class="grid grid-cols-6 gap-x-5 gap-y-3">
@@ -156,4 +162,23 @@ const saveCustomer = async () => {
 
   message.loading = false;
 };
+
+const updateFromEconomicCustomer = (cc) => {
+  if (!customer.value.id) {
+    customer.value.debit_number = cc.customerNumber;
+    customer.value.economic_id = cc.customerNumber;
+    customer.value.name = cc.name;
+    customer.value.email = cc.email;
+    customer.value.phone = cc.telephoneAndFaxNumber;
+    customer.value.cvr = cc.corporateIdentificationNumber;
+    customer.value.city = cc.city;
+    customer.value.address = cc.address;
+    customer.value.zip = cc.zip;
+    customer.value.country = cc.country;
+  }
+}
+
+const removeActiveEconomicCustomer = () => {
+  customer.value.economic_id = null;
+}
 </script>

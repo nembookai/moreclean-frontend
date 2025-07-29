@@ -95,6 +95,13 @@
                 <div class="text-sm text-gray-600 font-light">Farve:</div>
                 <span class="inline-block w-10 h-4 rounded-full align-middle" :style="{ backgroundColor: customer.color }"></span>
               </div>
+              <div class="mb-4">
+                <div class="text-sm text-gray-600 font-light">E-conomic:</div>
+                <div class="font-light text-gray-700">
+                  <PhCheck v-if="customer.economic_id" :size="20" class="text-green-600" weight="bold" />
+                  <PhX v-else :size="20" class="text-red-600" weight="bold" />
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -152,7 +159,7 @@ import { axiosClient } from '@/lib/axiosClient'
 import { useRoute, useRouter } from 'vue-router';
 import { Company } from '@/store/company';
 import { formatPrice } from '@/composables/Price';
-import { PhPen, PhCalendar, PhTrash, PhList, PhUser, PhAlignLeftSimple, PhMapPin, PhMoney } from '@phosphor-icons/vue';
+import { PhPen, PhCalendar, PhTrash, PhList, PhUser, PhAlignLeftSimple, PhMapPin, PhMoney, PhCheck } from '@phosphor-icons/vue';
 import moment from 'moment';
 
 /*******************************
