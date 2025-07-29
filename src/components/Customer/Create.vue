@@ -96,6 +96,10 @@
         </div>
         <div class="col-span-full">
           <div class="flex justify-end">
+            <div v-if="!customer.economic_id && !customer.id" class="flex items-center mr-4">
+              <input type="checkbox" id="createEconomic" v-model="customer.economic_create" class="mr-2" />
+              <label for="createEconomic" class="text-gray-600 text-[13px] cursor-pointer select-none">Opret kunde i economic også</label>
+            </div>
             <button class="btn btn__green !px-10" :disabled="message.loading" @click="saveCustomer">
               <span v-if="message.loading">Gemmer...</span>
               <span v-else>Gem kunde</span>
@@ -148,16 +152,28 @@ const saveCustomer = async () => {
 
   message.loading = true;
 
+  let customerToEmit = null;
   const url = customer.value.id ? `/customers/${customer.value.id}` : '/customers';
 
-  await axiosClient.post(url, customer.value).then((response) => {
+  await axiosClient.post(url, customer.value).then(async (response) => {
     message.showComplete('Kunden oprettet');
+    customerToEmit = response.customer;
 
     if (customer.value.id) {
       emit('updated', response.customer);
-    } else {
-      emit('created', response.customer);
+      return;
     }
+
+    if (customer.value.economic_create) {
+      await axiosClient.post('/economic/customers', response.customer).then(async (response) => {
+        message.showComplete('Kunden oprettet i e-conomic');
+        customer.value.economic_id = response.customer.economic_id;
+        customerToEmit = response.customer;
+      }).catch((e) => { });
+    }
+
+    emit('created', customerToEmit);
+    
   }).catch((e) => { });
 
   message.loading = false;
