@@ -130,7 +130,7 @@ export const Tasks = defineStore('tasks', () => {
       activeTask.value = null;
       
       if (task.recurring?.enabled) {
-        if (method === 3 || method === 4) {
+        if (method === 1 || method === 3 || method === 4) {
           window.location.reload();
         }
       }
@@ -145,9 +145,14 @@ export const Tasks = defineStore('tasks', () => {
       return;
     }
 
+    tasks.value[activeTask.value.date] = tasks.value[activeTask.value.date].filter(t => t.id !== activeTask.value.id);
+
+    if (!tasks.value[allTasks[0].date]) {
+      tasks.value[allTasks[0].date] = [];
+    }
+
+    tasks.value[allTasks[0].date].push(allTasks[0]);
     activeTask.value = allTasks[0];
-    let index = tasks.value[activeTask.value.date].findIndex(t => t.id === activeTask.value.id);
-    tasks.value[activeTask.value.date][index] = activeTask.value;
   }
 
   function createFromDate(day, time = null) {
@@ -200,6 +205,7 @@ export const Tasks = defineStore('tasks', () => {
       return;
     }
 
+    activeTask.value = null;
     activeTask.value = Object.values(tasks.value).flat().find(t => t.id == task);
   }
 

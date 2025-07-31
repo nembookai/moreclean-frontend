@@ -81,13 +81,13 @@
             </div>
           </div>
         </div>
-        <div class="box relative p-6 mt-5 mb-10 min-h-[550px] max-h-[900px] overflow-y-auto">
-          <div class="text-xl text-gray-700 font-light mb-2 flex items-center gap-x-2">
+        <div class="box relative !p-0 mt-5 mb-10">
+          <div class="text-xl text-gray-700 font-light mb-2 p-6 flex items-center gap-x-2">
             <PhClock :size="22" weight="regular" /> 
             Timehistorik
             <DatePicker :prefilledDate="activeDate" @resetSearch="resetDateSearch" @dateSearch="dateSearch" class="!text-[13px] ml-2 mt-0.5 !leading-none" />
           </div>
-          <div v-if="tasks.length" class="flex flex-col gap-y-2 mt-4">
+          <div v-if="tasks.length" class="flex flex-col px-6 gap-y-2 mt-4">
             <div class="grid grid-cols-12 gap-x-10 border-b border-gray-200 pb-2">
               <div class="col-span-4">Opgave</div>
               <div class="col-span-7 flex justify-between items-center">
@@ -95,11 +95,11 @@
                 <div>Timer</div>
               </div>
             </div>
-            <div class="pb-10">
+            <div class="pb-5">
               <div v-for="(task, index) in tasks" :key="task.id">
                 <div class="grid grid-cols-12 gap-x-10 border-b border-gray-200 pb-2" :class="{ 'border-b-0': index === tasks.length - 1 }">
                   <div class="col-span-4">
-                    <Calendar-Task :showDate="true" class="!h-[40px]" :task="task" :reloadOnUpdate="true" lineClampOverride="line-clamp-2" />
+                    <Calendar-Task :showDate="true" class="!h-[40px]" :task="task" :reloadOnUpdate="true" lineClampOverride="line-clamp-1" />
                   </div>
                   <div class="col-span-7">
                     <div v-for="product in task.products" :key="product.id">
@@ -116,7 +116,10 @@
                 </div>
               </div>
             </div>
-            <div class="sticky bottom-[20px] py-5 bg-primary-50 rounded-md grid grid-cols-3">
+          </div>
+          <div class="py-[150px] text-center text-gray-500" v-if="!tasks.length">Ingen timer fundet</div>
+          <div class="bg-white rounded-md p-2" v-if="tasks.length">
+            <div class="py-5 bg-primary-50 rounded-md grid grid-cols-3">
               <div>
                 <div class="font-light text-gray-700 text-center text-[30px] leading-[30px]">{{ tasks.length }}</div>
                 <div class="text-sm text-gray-600 font-light text-center">Antal opgaver</div>
@@ -131,7 +134,6 @@
               </div>
             </div>
           </div>
-          <div class="py-[150px] text-center text-gray-500" v-if="!tasks.length">Ingen timer fundet</div>
         </div>
       </div>
       <div class="col-span-2 pl-[30px] flex flex-col gap-y-2">

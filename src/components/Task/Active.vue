@@ -131,9 +131,9 @@
             </div>
           </div>
           <div class="flex items-center justify-end gap-x-5">
-            <div v-if="!tasks.activeTask.recurring?.enabled" class="text-red-500 underline text-[13px] font-light underline-offset-2 leading-[15px] select-none cursor-pointer hover-transition hover:opacity-80 active:opacity-100 active:translate-y-[-1.5px]" @click.stop="deleteFromMethod(1)">Slet opgaven</div>
+            <div v-if="!tasks.activeTask.recurring?.enabled || !tasks.activeTask.recurring_id" class="text-red-500 underline text-[13px] font-light underline-offset-2 leading-[15px] select-none cursor-pointer hover-transition hover:opacity-80 active:opacity-100 active:translate-y-[-1.5px]" @click.stop="deleteFromMethod(1)">Slet opgaven</div>
             <div class="relative">
-              <div v-if="tasks.activeTask.recurring?.enabled" class="text-red-600 underline flex items-center gap-x-1 text-[13px] font-light underline-offset-2 leading-[15px] select-none cursor-pointer hover-transition hover:opacity-80 active:opacity-100 active:translate-y-[-1.5px]" @click.stop="showDeleteRecurring = !showDeleteRecurring">
+              <div v-if="tasks.activeTask.recurring?.enabled && tasks.activeTask.recurring_id" class="text-red-600 underline flex items-center gap-x-1 text-[13px] font-light underline-offset-2 leading-[15px] select-none cursor-pointer hover-transition hover:opacity-80 active:opacity-100 active:translate-y-[-1.5px]" @click.stop="showDeleteRecurring = !showDeleteRecurring">
                 Sletning mulighed <PhCaretDown :size="16" weight="bold" class="hover-transition" :class="{ 'rotate-180': showDeleteRecurring }" />
               </div>
               <transition name="dropdown">
@@ -162,7 +162,7 @@
           </div>
         </div>
       </template>
-      <Task-Edit class="p-5" v-else :task="tasks.activeTask" @close="showEditTask = false" @updated="tasks.updateTask" />
+      <Task-Edit class="p-5" v-else :task="tasks.activeTask" @changeRecurring="changeRecurring" @close="showEditTask = false" @updated="tasks.updateTask" />
     </div>
   </div>
 </template>
@@ -220,6 +220,11 @@ const deleteFromMethod = (method) => {
   deleteMethod.value = method;
   deleteTask.value = true;
 };
+
+const changeRecurring = () => {
+  showEditTask.value = false;
+  tasks.setActiveTask(tasks.activeTask.recurring_id, true);
+}
 
 const earnings = computed(() => {
   return (((tasks.activeTask.economy.invoice_hours_customer / 100) * tasks.activeTask.economy.hourly_price) + tasks.activeTask.economy.fixed_price);

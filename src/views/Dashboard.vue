@@ -16,12 +16,10 @@
 /******************************
  * Imports & props
 ******************************/
-import { ref, onMounted, nextTick } from 'vue';
+import { ref, nextTick } from 'vue';
 import { Calendar } from '@/store/calendar';
 import { Tasks } from '@/store/tasks';
-import { onBeforeMount } from 'vue';
 import { Loading } from '@/store/loading';
-import { axiosClient } from '@/lib/axiosClient';
 
 /******************************
  * Refs
@@ -30,17 +28,6 @@ const calendar = Calendar();
 const tasks = Tasks();
 const calendarContainer = ref(null);
 const loading = Loading();
-
-/******************************
- * Lifecycle Hooks
-******************************/
-onBeforeMount(async () => {
-  await nextTick();
-
-  setTimeout(() => {
-    scrollToCenter();
-  }, 100);
-});
 
 /******************************
  * Methods

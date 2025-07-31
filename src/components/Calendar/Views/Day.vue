@@ -19,7 +19,7 @@
         <Drop v-for="(time, timeIndex) in calendar.timeslots" :key="time" :accepts-data="(task) => acceptsOnlyTasks(task, time)" @drop="(task) => tasks.handleDrop(task, day, time)" class="border-b h-[50px] hover:bg-[#fdfdfd] cursor-pointer border-gray-100" @click="tasks.createFromDate(day, time)"></Drop>
         <template v-for="(group, gIndex) in tasks.groupedTasks(day)" :key="gIndex">
           <drag handle=".dragHandler" @dragstart="tasks.draggingTaskId = task.id" @dragend="tasks.draggingTaskId = null" v-if="group.length <= 2" v-for="(task, tIndex) in group" :drag-image-opacity="0.5" :data="task" :go-back="true" mode="cut" type="card" :key="'task-' + task.id" class="absolute" :style="{ top: calendar.getTaskTop(task.start_time) + 'px', left: group.length === 1 ? '4px' : tIndex === 0 ? '4px' : 'calc(50% + 2px)', width: group.length === 1 ? 'calc(100% - 8px)' : 'calc(50% - 6px)', height: calendar.getTaskHeight(task) + 'px' }" :class="{ 'pointer-events-none': tasks.draggingTaskId && tasks.draggingTaskId !== task.id }">
-            <Calendar-Task :task="task" :allowResize="!task?.recurring?.enabled" />
+            <Calendar-Task :task="task" :allowResize="false" />
           </drag>
           <div v-else class="absolute left-1 right-1" :style="{ top: calendar.getTaskTop(calendar.getEarliestStart(group)) + 'px', height: calendar.getGroupHeight(group) + 'px' }" :class="{ 'pointer-events-none': tasks.draggingTaskId }">
             <div class="relative h-full">

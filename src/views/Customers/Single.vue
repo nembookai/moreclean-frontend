@@ -110,7 +110,7 @@
             <div class="text-xl text-gray-700 font-light mb-2 flex items-center gap-x-2"><PhList :size="22" weight="regular" /> Opgavehistorik (dette år)</div>
             <div class="flex flex-col gap-y-2" v-if="tasks.length">
               <div v-for="task in tasks" :key="task.id">
-                <Calendar-Task :showDate="true" class="h-[40px]" :task="task" lineClampOverride="line-clamp-2" />
+                <Calendar-Task :showDate="true" class="h-[40px]" :task="task" lineClampOverride="line-clamp-1" />
               </div>
             </div>
             <div v-else>
@@ -159,7 +159,7 @@ import { axiosClient } from '@/lib/axiosClient'
 import { useRoute, useRouter } from 'vue-router';
 import { Company } from '@/store/company';
 import { formatPrice } from '@/composables/Price';
-import { PhPen, PhCalendar, PhTrash, PhList, PhUser, PhAlignLeftSimple, PhMapPin, PhMoney, PhCheck } from '@phosphor-icons/vue';
+import { PhPen, PhCalendar, PhTrash, PhList, PhUser, PhAlignLeftSimple, PhMapPin, PhMoney, PhCheck, PhX } from '@phosphor-icons/vue';
 import moment from 'moment';
 
 /*******************************
@@ -186,7 +186,30 @@ onBeforeMount(async () => {
   await axiosClient.get(`/customers/${route.params.id}`).then(response => {
     customer.value = response.customer;
     tasks.value = response.tasks;
-    stats.value = response.stats;
+    stats.value.tasks = response.tasks?.length || 0;
+
+    stats.value.earned = tasks.value.reduce((acc, task) => {
+      const economy = task.economy;
+      const fixedPrice = economy?.fixed_price || 0;
+      const hourlyPrice = economy?.hourly_price || 0;
+      const invoiceHours = (economy?.invoice_hours_customer / 100) || 0;
+
+      return acc + (invoiceHours * hourlyPrice + fixedPrice);
+    }, 0);
+
+    stats.value.costs = tasks.value.reduce((acc, task) => {
+      let totalCosts = 0;
+      const hours = (task?.economy?.invoice_hours_employee / 100) || 0;
+      
+      task.employees.forEach(employee => {
+        totalCosts += (hours * employee.payout_amount);
+      });
+
+      return acc + totalCosts;
+    }, 0);
+
+    stats.value.result = stats.value.earned - stats.value.costs;
+
   }).catch((e) => { });
 
   loading.reset();

@@ -63,7 +63,7 @@
         <div class="mt-4 text-sm text-gray-600">Gentag indtil <span class="font-light">(afslut)</span></div>
         <VueDatePicker locale="da" :format-locale="da" v-model="recurring.ending_at" :clearable="true" :enable-time-picker="false" model-type="yyyy-MM-dd" :close-on-auto-apply="true" :auto-apply="true" format="dd. MMM yyyy" class="w-[160px] !mt-[2px]" />
       </div>
-      <div v-if="is_recurring" @click="tasks.setActiveTask(is_recurring, true)" class="text-primary-500 hover:text-primary-600 active:text-primary-700 underline cursor-pointer mt-2 text-[14px]">Ændre gentagelse på original opgave</div>
+      <div v-if="is_recurring" @click="$emit('changeRecurring')" class="text-primary-500 hover:text-primary-600 active:text-primary-700 w-fit underline cursor-pointer mt-2 text-[14px]">Ændre gentagelse på original opgave</div>
     </div>
   </div>
 </template>
@@ -91,6 +91,7 @@ const isOpen = ref(false);
 const recurring = defineModel('recurring');
 const daysOfWeek = ['Man', 'Tir', 'Ons', 'Tor', 'Fre', 'Lør', 'Søn'];
 const tasks = Tasks();
+const emit = defineEmits(['changeRecurring']);
 
 /******************************
  * Methods

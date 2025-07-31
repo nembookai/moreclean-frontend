@@ -4,7 +4,7 @@
       <Task-Creation-Customer v-model:customer="newTask.customer" :lastCustomerNumber="company.lastCustomerNumber" :prefillServiceAgreement="newTask.service_agreement" :loading="company.loading.customers" :allCustomers="company.customers" @updateFromCustomer="updateFromCustomer" @removeServiceAgreement="removeServiceAgreement" />
       <Task-Creation-Employees v-model:employees="newTask.employees" :loading="company.loading.employees" :allEmployees="company.employees" />
       <Task-Creation-Products v-model:products="newTask.products" :loading="company.loading.products" :manually_changed="newTask.economy.manually_changed" :allProducts="company.products" @updateFromProducts="updateFromProducts" />
-      <Task-Creation-DatePicker v-model:recurring="newTask.recurring" :is_recurring="task.recurring_id" v-model:date="newTask.date" v-model:startTime="newTask.start_time" v-model:endTime="newTask.end_time" />
+      <Task-Creation-DatePicker v-model:recurring="newTask.recurring" :is_recurring="task.recurring_id" @changeRecurring="$emit('changeRecurring')" v-model:date="newTask.date" v-model:startTime="newTask.start_time" v-model:endTime="newTask.end_time" />
       <Task-Creation-Location v-model:location="newTask.location" />
       <Task-Creation-Economy v-if="!newTask.service_agreement_id" v-model:economy="newTask.economy" :start="newTask.start_time" :end="newTask.end_time" :products="newTask.products" :employees="newTask.employees" :customer="newTask.customer" />
       <Task-Creation-ColorPicker v-model:color="newTask.color" />
@@ -15,12 +15,12 @@
     </div>
     <div class="flex items-center gap-x-5 mt-5 justify-end">
       <div class="text-gray-500 text-[15px] cursor-pointer underline underline-offset-2 font-light hover-transition hover:opacity-80 active:opacity-100 active:translate-y-[-1.5px]" @click="emit('close')">Annuller</div>
-      <button class="btn btn__green" :disabled="loading" v-if="!newTask.recurring?.enabled" @click="editTask(1)">
+      <button class="btn btn__green" :disabled="loading" v-if="!newTask.recurring?.enabled || !newTask.recurring_id" @click="editTask(1)">
         <span v-if="!loading">Gem opgaven</span>
         <span v-else>Gemmer opgaven...</span>
       </button>
       <div class="relative">
-        <button class="btn btn__green" :disabled="loading" v-if="newTask.recurring?.enabled" @click="showEditRecurring = !showEditRecurring">
+        <button class="btn btn__green" :disabled="loading" v-if="newTask.recurring?.enabled && newTask.recurring_id" @click="showEditRecurring = !showEditRecurring">
           <div class="flex items-center gap-x-1" v-if="!loading">Gem opgaven <PhCaretDown :size="16" weight="bold" class="hover-transition" :class="{ 'rotate-180': showEditRecurring }" /></div>
           <div class="flex items-center gap-x-1" v-else>Gemmer gentagelse...</div>
         </button>
@@ -56,7 +56,7 @@ const props = defineProps(['task']);
  * Refs & consts
 ******************************/
 const message = inject('message');
-const emit = defineEmits(['close', 'updated']);
+const emit = defineEmits(['close', 'updated', 'changeRecurring']);
 const company = Company();
 const loading = ref(false);
 const newTask = ref({
