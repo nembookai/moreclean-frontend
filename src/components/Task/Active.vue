@@ -18,7 +18,8 @@
             <div>
               <div class="text-gray-700 text-[15px] font-semibold leading-[15px]">Kunde</div>
               <div class="text-gray-800 text-[14px] font-light flex items-center gap-x-1 mt-1">
-                <span>({{ tasks.activeTask.customer?.number }})</span>{{ tasks.activeTask.customer?.name }}
+                <RouterLink :to="`/customers/${tasks.activeTask.customer?.id}`" @click="$emit('close')" class="hover:underline hover:text-primary-500 hover-transition">{{ tasks.activeTask.customer?.name }}</RouterLink>  
+                <span>({{ tasks.activeTask.customer?.number }})</span>
                 <QuickContact type="mail" :customer="tasks.activeTask.customer" />
                 <QuickContact type="phone" :customer="tasks.activeTask.customer" />
               </div>
@@ -33,7 +34,7 @@
               <div class="text-gray-700 text-[15px] font-semibold leading-[15px]">Medarbejdere</div>
               <div class="text-gray-800 text-[14px] font-light mt-1">
                 <div class="flex items-center gap-x-1" v-if="tasks.activeTask.employees?.length" v-for="employee in tasks.activeTask.employees" :key="employee.id">
-                  <span>{{ employee.name }}</span>
+                  <RouterLink :to="`/employees/${employee.id}`" @click="$emit('close')" class="hover:underline hover:text-primary-500 hover-transition">{{ employee.name }}</RouterLink>
                   <QuickContact type="mail" :customer="employee" />
                   <QuickContact type="phone" :customer="employee" />
                 </div>

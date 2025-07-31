@@ -105,38 +105,37 @@
             </div>
           </div>
         </div>
-        <div class="grid grid-cols-12 gap-x-4 mt-4 mb-10">
-          <div class="box p-6 col-span-6 h-[300px] overflow-y-auto">
-            <div class="text-xl text-gray-700 font-light mb-2 flex items-center gap-x-2"><PhList :size="22" weight="regular" /> Opgavehistorik (dette år)</div>
-            <div class="flex flex-col gap-y-2" v-if="tasks.length">
-              <div v-for="task in tasks" :key="task.id">
-                <Calendar-Task :showDate="true" class="h-[40px]" :task="task" lineClampOverride="line-clamp-1" />
-              </div>
-            </div>
-            <div v-else>
-              <div class="text-gray-500 text-sm font-light text-center py-10">Ingen opgaver fundet</div>
+        <div class="box p-6 col-span-6 min-h-[150px] mt-5 mb-10">
+          <div class="text-xl text-gray-700 font-light mb-2 flex items-center gap-x-2">
+            <PhClock :size="22" weight="regular" /> 
+            Timehistorik
+            <DatePicker :prefilledDate="activeDate" @resetSearch="resetDateSearch" @dateSearch="dateSearch" class="!text-[13px] ml-2 mt-0.5 !leading-none" />
+          </div>
+          <div class="flex flex-col gap-y-2 px-2 py-6" v-if="tasks.length">
+            <div v-for="task in tasks" :key="task.id">
+              <Calendar-Task :showDate="true" class="h-[40px]" :task="task" lineClampOverride="line-clamp-1" />
             </div>
           </div>
-          <div class="box p-6 col-span-6 h-[300px] flex justify-between flex-col">
-            <div class="text-xl text-gray-700 font-light mb-2 flex items-center gap-x-2"><PhMoney :size="22" weight="regular" /> Økonomi (dette år)</div>
-            <div class="flex-1 items-center w-full flex">
-              <div class="grid grid-cols-2 w-full gap-y-10">
-                <div>
-                  <div class="font-light text-gray-700 text-center text-[30px] leading-[30px]">{{ stats.tasks }}</div>
-                  <div class="text-sm text-gray-600 font-light text-center">Antal opgaver</div>
-                </div>
-                <div>
-                  <div class="font-light text-center text-[30px] leading-[30px] text-green-600">{{ formatPrice(stats.earned) }} kr.</div>
-                  <div class="text-sm text-gray-600 font-light text-center">Indtjening</div>
-                </div>
-                <div>
-                  <div class="font-light text-center text-[30px] leading-[30px] text-red-600">{{ formatPrice(stats.costs) }} kr.</div>
-                  <div class="text-sm text-gray-600 font-light text-center">Udgifter</div>
-                </div>
-                <div>
-                  <div class="font-light text-center text-[30px] leading-[30px]" :class="stats.result > 0 ? 'text-green-600' : ( stats.result < 0 ? 'text-red-600' : 'text-gray-600')">{{ formatPrice(stats.result) }} kr.</div>
-                  <div class="text-sm text-gray-600 font-light text-center">Resultat</div>
-                </div>
+          <div v-else>
+            <div class="text-gray-500 text-sm font-light text-center py-10">Ingen opgaver fundet</div>
+          </div>
+          <div class="bg-white rounded-md p-2" v-if="tasks.length">
+            <div class="py-5 bg-primary-50 rounded-md grid grid-cols-4">
+              <div>
+                <div class="font-light text-gray-700 text-center text-[30px] leading-[30px]">{{ stats.tasks }}</div>
+                <div class="text-sm text-gray-600 font-light text-center">Antal opgaver</div>
+              </div>
+              <div>
+                <div class="font-light text-green-500 text-center text-[30px] leading-[30px]">kr. {{ formatPrice(stats.earned) }}</div>
+                <div class="text-sm text-gray-600 font-light text-center">Indtjening</div>
+              </div>
+              <div>
+                <div class="font-light text-red-500 text-center text-[30px] leading-[30px]">kr. {{ formatPrice(stats.costs * -1) }}</div>
+                <div class="text-sm text-gray-600 font-light text-center">Udgifter</div>
+              </div>
+              <div>
+                <div class="font-light text-gray-700 text-center text-[30px] leading-[30px]" :class="stats.result > 0 ? 'text-green-600' : ( stats.result < 0 ? 'text-red-600' : 'text-gray-600')">kr. {{ formatPrice(stats.result) }}</div>
+                <div class="text-sm text-gray-600 font-light text-center">Resultat</div>
               </div>
             </div>
           </div>
@@ -159,7 +158,7 @@ import { axiosClient } from '@/lib/axiosClient'
 import { useRoute, useRouter } from 'vue-router';
 import { Company } from '@/store/company';
 import { formatPrice } from '@/composables/Price';
-import { PhPen, PhCalendar, PhTrash, PhList, PhUser, PhAlignLeftSimple, PhMapPin, PhMoney, PhCheck, PhX } from '@phosphor-icons/vue';
+import { PhPen, PhCalendar, PhTrash, PhUser, PhAlignLeftSimple, PhMapPin, PhClock, PhCheck, PhX } from '@phosphor-icons/vue';
 import moment from 'moment';
 
 /*******************************
@@ -170,6 +169,10 @@ const router = useRouter();
 const loading = inject('loading');
 const customer = ref({});
 const tasks = ref([]);
+const activeDate = ref({
+  start: moment().startOf('month').format('YYYY-MM-DD'),
+  end: moment().endOf('month').format('YYYY-MM-DD')
+})
 const company = Company();
 const stats = ref({});
 
@@ -181,9 +184,16 @@ const openDeleteSure = ref(false);
 * Lifecycle hooks
 ******************************/
 onBeforeMount(async () => {
+  await getApi();
+});
+
+/*******************************
+* Methods and functions
+******************************/
+async function getApi() {
   loading.load('Henter data');
 
-  await axiosClient.get(`/customers/${route.params.id}`).then(response => {
+  await axiosClient.get(`/customers/${route.params.id}?startdate=${activeDate.value.start}&enddate=${activeDate.value.end}`).then(response => {
     customer.value = response.customer;
     tasks.value = response.tasks;
     stats.value.tasks = response.tasks?.length || 0;
@@ -213,11 +223,8 @@ onBeforeMount(async () => {
   }).catch((e) => { });
 
   loading.reset();
-});
+}
 
-/*******************************
-* Methods and functions
-******************************/
 const updateCustomer = (c) => {
   customer.value = c;
   openEditCustomer.value = false;
@@ -237,5 +244,18 @@ const deleteCustomer = () => {
   axiosClient.delete(`/customers/${customer.value.id}`).then(() => {
     router.push({ name: 'customers.index' });
   }).catch((e) => { });
+}
+
+const resetDateSearch = () => {
+  activeDate.value = {
+    start: moment().startOf('month').format('YYYY-MM-DD'),
+    end: moment().endOf('month').format('YYYY-MM-DD')
+  };
+  getApi();
+}
+
+const dateSearch = (date) => {
+  activeDate.value = date;
+  getApi();
 }
 </script>
