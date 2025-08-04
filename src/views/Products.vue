@@ -20,6 +20,15 @@
         <td>{{ product.name }}</td>
         <td>{{ formatPrice(product.hours) || '--' }} <span v-if="product.hours">timer</span></td>
         <td>{{ formatPrice(product.price) }} {{ product.pricing_type === 'hourly' ? 'kr. pr. time' : 'kr. pr. opgave' }}</td>
+        <td class="h-full">
+          <div class="flex flex-col justify-center items-center">
+            <div v-if="product.economic_id">
+              <PhCheck :size="22" weight="bold" class="text-green-500" />
+              <div class="text-[10px] text-gray-600">({{ product.economic_id }})</div>
+            </div>
+            <PhX :size="22" weight="bold" class="text-red-500" v-else />
+          </div>
+        </td>
         <td>
           <div class="flex justify-end items-center relative">
             <div @click="setActiveProduct(product)" class="flex items-center gap-x-0.5 cursor-pointer hover-transition hover:text-primary-600 active:text-primary-800 select-none" :class="activeProduct?.id === product.id ? 'text-primary-700' : ''">
@@ -51,7 +60,7 @@
 ******************************/
 import { ref, onBeforeMount, inject } from 'vue';
 import { axiosClient } from '@/lib/axiosClient'
-import { PhCaretDown, PhPen, PhBackspace, PhPlus } from '@phosphor-icons/vue';
+import { PhCaretDown, PhPen, PhBackspace, PhPlus, PhCheck, PhX } from '@phosphor-icons/vue';
 import { formatPrice } from '@/composables/Price';
 
 /*******************************
@@ -72,6 +81,10 @@ const headers = [
   {
     name: 'Pris',
     sortable: 'price'
+  },
+  {
+    name: 'E-conomic',
+    sortable: 'economic_id'
   },
   {
     name: ''

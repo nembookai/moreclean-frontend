@@ -130,7 +130,7 @@ const headers = [
     name: 'Adresse'
   },
   {
-    name: 'Economic',
+    name: 'E-conomic',
     sortable: 'economic_id'
   },
   {
