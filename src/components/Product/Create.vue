@@ -1,8 +1,14 @@
 <template>
   <Modal @close="$emit('close')" modalWidth="w-[700px]">
     <template #header>
-      <div class="text-[19px] font-normal text-primary-900" v-if="!product.id">Opret ny produkt</div>
-      <div class="text-[19px] font-normal text-primary-900" v-else>Rediger produkt</div>
+      <div class="flex items-center gap-x-3" v-if="!product.id">
+        <div class="text-[19px] font-normal text-primary-900">Opret nyt produkt</div>
+        <Product-EconomicModule :product="product" @update:product="updateFromEconomicProduct" @remove:product="removeActiveEconomicProduct" />
+      </div>
+      <div class="text-[19px] font-normal text-primary-900 flex items-center gap-x-3" v-else>
+        Rediger produkt
+        <Product-EconomicModule :product="product" @update:product="updateFromEconomicProduct" @remove:product="removeActiveEconomicProduct" />
+      </div>
     </template>
     <template #content>
       <div class="grid grid-cols-6 gap-x-5 gap-y-3">
@@ -32,6 +38,10 @@
         </div>
         <div class="col-span-full">
           <div class="flex justify-end">
+            <div v-if="!product.economic_id && !product.id" class="flex items-center mr-4">
+              <input type="checkbox" id="createEconomic" v-model="product.economic_create" class="mr-2" />
+              <label for="createEconomic" class="text-gray-600 text-[13px] cursor-pointer select-none">Opret produkt i economic også</label>
+            </div>
             <button class="btn btn__green !px-10" :disabled="message.loading" @click="saveProduct">
               <span v-if="message.loading">Gemmer...</span>
               <span v-else>Gem produkt</span>
@@ -78,18 +88,43 @@ const saveProduct = async () => {
 
   message.loading = true;
 
+  let productToEmit = null;
   const url = product.value.id ? `/products/${product.value.id}` : '/products';
 
-  await axiosClient.post(url, product.value).then((response) => {
+  await axiosClient.post(url, product.value).then(async (response) => {
     message.showComplete('Produktet oprettet');
+    productToEmit = response.product;
 
     if (product.value.id) {
       emit('updated', response.product);
-    } else {
-      emit('created', response.product);
+      return;
     }
+
+    if (product.value.economic_create) {
+      await axiosClient.post('/economic/products', response.product).then(async (response) => {
+        message.showComplete('Produktet oprettet i e-conomic');
+        product.value.economic_id = response.product.economic_id;
+        productToEmit = response.product;
+      }).catch((e) => { });
+    }
+    
+    emit('created', productToEmit);
+    
   }).catch((e) => { });
 
   message.loading = false;
 };
+
+const updateFromEconomicProduct = (pp) => {
+  if (!product.value.id) {
+    product.value.economic_id = pp.productNumber;
+    product.value.name = pp.name;
+    product.value.price = (pp.salesPrice * 100);
+    product.value.description = pp.description;
+  }
+}
+
+const removeActiveEconomicProduct = () => {
+  product.value.economic_id = null;
+}
 </script>
