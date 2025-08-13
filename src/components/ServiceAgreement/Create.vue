@@ -17,7 +17,7 @@
           </div>
           <div class="col-span-2">
             <label class="text-gray-600 text-[13px]">Normtid pr uge <span>(Antal timer)</span></label>
-            <input type="input" id="norm_hours" v-model="serviceAgreement.weekly_hours" class="input !mt-0" autocomplete="new-password" placeholder="Tilføj normtid" />
+            <input type="number" id="norm_hours" v-model="serviceAgreement.weekly_hours" class="input !mt-0" autocomplete="new-password" placeholder="Tilføj normtid" />
           </div>
           <div class="col-span-full -mb-2 bg-primary-600 text-white w-fit px-2 mt-3 rounded text-[18px]">Faktura oplysninger</div>
           <div class="col-span-4">

@@ -197,8 +197,6 @@ const saveServiceAgreement = (sa) => {
 };
 
 const deleteServiceAgreement = () => {
-  const index = customerData.value.data.findIndex(c => c.id === serviceAgreement.value.id);
-  customerData.value.data[index].service_agreement = null;
-  serviceAgreement.value = null;
+  window.location.reload();
 };
 </script>

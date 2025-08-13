@@ -37,6 +37,9 @@
           <textarea ref="locationInput" id="adresse" autocomplete="one-time-code" v-model="product.description" class="input !mt-0" placeholder="Note" />
         </div>
         <div class="col-span-full">
+          <LayoutComponents-Toggle v-model="product.invoice" text="Inkluder i faktura" />
+        </div>
+        <div class="col-span-full">
           <div class="flex justify-end">
             <div v-if="!product.economic_id && !product.id" class="flex items-center mr-4">
               <input type="checkbox" id="createEconomic" v-model="product.economic_create" class="mr-2" />
@@ -74,6 +77,7 @@ const message = inject('message');
 onBeforeMount(() => {
   if (!product.value.id) {
     product.value.pricing_type = 'hourly';
+    product.value.invoice = 1;
   }
 });
 

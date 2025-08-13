@@ -3,7 +3,7 @@
     <div @click="isDateOpen = !isDateOpen" :class="isDateOpen ? 'bg-gray-300 active:bg-gray-400' : 'bg-gray-200/75 hover:bg-gray-300 active:bg-gray-400'" class="flex relative items-center gap-x-2 px-3.5 py-2.5 select-none border-gray-300/75 text-gray-700 rounded-[5px] cursor-pointer hover-transition">
       <PhCalendarBlank weight="bold" :size="16" />
       <template v-if="customSpan">
-        <slot :name="customSpan" />
+        <slot name="customSpan" />
       </template>
       <div v-else>{{ displayDate }}</div>
     </div>
@@ -40,14 +40,14 @@
         <div class="grid grid-cols-2 mt-2 gap-x-3">
           <div>
             <div class="col-span-full text-[13px] text-gray-600 font-normal">Startsdato</div>
-            <VueDatePicker locale="da" :format-locale="da" text-input v-model="activeDate.start" :clearable="false" :enable-time-picker="false" model-type="yyyy-MM-dd"  :close-on-auto-apply="true" prevent-min-max-navigation :auto-apply="true" format="dd/MM/yyyy"></VueDatePicker>
+            <VueDatePicker locale="da" :format-locale="da" text-input v-model="activeDate.start" :clearable="false" :enable-time-picker="false" model-type="yyyy-MM-dd"  :close-on-auto-apply="true" prevent-min-max-navigation :auto-apply="true" format="dd/MM/yyyy" @update:model-value="updateDate"></VueDatePicker>
           </div>
           <div>
             <div class="col-span-full text-[13px] text-gray-600 font-normal">Slutdato</div>
-            <VueDatePicker locale="da" :format-locale="da" text-input v-model="activeDate.end" :clearable="false" :enable-time-picker="false" model-type="yyyy-MM-dd"  :close-on-auto-apply="true" prevent-min-max-navigation :auto-apply="true" format="dd/MM/yyyy"></VueDatePicker>
+            <VueDatePicker locale="da" :format-locale="da" text-input v-model="activeDate.end" :clearable="false" :enable-time-picker="false" model-type="yyyy-MM-dd"  :close-on-auto-apply="true" prevent-min-max-navigation :auto-apply="true" format="dd/MM/yyyy" @update:model-value="updateDate"></VueDatePicker>
           </div>
         </div>
-        <div class="flex items-center justify-end mt-3 gap-x-3">
+        <div class="flex items-center justify-end mt-3 gap-x-3" v-if="!hideActions">
           <div v-if="prefilledDate?.start" class="text-primary-700 text-[13px] cursor-pointer" @click="$emit('resetSearch'); isDateOpen = false;">Nulstil søgning</div>
           <button class="btn btn__green btn__small" @click="$emit('dateSearch', { ...activeDate, tab: activeTab }); isDateOpen = false">
             Søg efter dato
@@ -62,11 +62,11 @@
 /*******************************
  * Imports & props
 ******************************/
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import moment from 'moment';
 import { PhArrowRight, PhCalendarBlank } from '@phosphor-icons/vue';
 import { da } from 'date-fns/locale';
-const props = defineProps(['customSpan', 'prefilledDate'])
+const props = defineProps(['customSpan', 'prefilledDate', 'hideActions'])
 
 /*******************************
  * Styles
@@ -156,6 +156,30 @@ const displayDate = computed(() => {
     return moment(activeDate.value.start).format('Q') + ' Kvartal ' + moment(activeDate.value.start).format('YYYY');
   } else if (activeTab.value === 1) {
     return moment(activeDate.value.start).format('MMMM') + ' ' + moment(activeDate.value.start).format('YYYY');
+  }
+})
+
+const updateDate = (date) => {
+  if (moment(date).year() > moment(activeDate.value.end).year()) {
+    activeDate.value.end = moment(date).format('YYYY-MM-DD');
+  }
+
+  if (moment(date).isBefore(moment(activeDate.value.start))) {
+    activeDate.value.start = moment(date).format('YYYY-MM-DD');
+  }
+
+  if (props.hideActions) {
+    emit('dateSearch', { ...activeDate.value, tab: activeTab.value });
+  }
+}
+
+/*******************************
+ * Watchers
+******************************/
+watch(activeDate, (newVal) => {
+  if (props.hideActions) {
+    emit('dateSearch', { ...newVal, tab: activeTab.value });
+    isDateOpen.value = false;
   }
 })
 </script>

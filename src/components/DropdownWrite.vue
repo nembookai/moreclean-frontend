@@ -136,11 +136,19 @@ const selectValue = (value) => {
 }
 
 const isSelected = (value) => {
+  const matchFn = (a, b) => {
+    if (a.id != null && b.id != null) {
+      return a.id === b.id;
+    }
+    return a[props.display] === b[props.display];
+  };
+
   if (props.multiple) {
-    return valueInput.value.some(v => v[props.display] === value[props.display]);
+    return valueInput.value.some(v => matchFn(v, value));
   }
-  return props.chosenValue?.[props.display] === value[props.display];
-}
+
+  return props.chosenValue ? matchFn(props.chosenValue, value) : false;
+};
 
 const selectWithEnter = () => {
   if (!values.value.length) return;

@@ -39,7 +39,7 @@
 ******************************/
 import { ref } from 'vue';
 import { Auth } from '@/store/auth';
-import { PhCalendar, PhIdentificationBadge, PhPackage, PhUsers, PhGear, PhSignOut } from '@phosphor-icons/vue';
+import { PhCalendar, PhIdentificationBadge, PhPackage, PhUsers, PhGear, PhSignOut, PhFile } from '@phosphor-icons/vue';
 
 /******************************
  * Refs
@@ -68,6 +68,11 @@ const menuItems = [
     name: 'Medarbejdere',
     icon: PhIdentificationBadge,
     route: 'employees.index'
+  },
+  {
+    name: 'Fakturering',
+    icon: PhFile,
+    route: 'invoices'
   }
 ];
 

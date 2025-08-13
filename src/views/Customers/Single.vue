@@ -236,8 +236,7 @@ const saveServiceAgreement = (sa) => {
 }
 
 const deleteServiceAgreement = () => {
-  customer.value.service_agreement = null;
-  openServiceAgreement.value = false;
+  window.location.reload();
 }
 
 const deleteCustomer = () => {

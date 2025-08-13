@@ -1,7 +1,7 @@
 <template>
-  <div class="flex items-center" :class="{ '!text-[13px]': small }">
+  <div class="flex items-center">
     <div class="toggle-switch" :class="{ 'checked': modelValue }" @click="toggle"></div>
-    <div class="ml-2 text-gray-700 text-nowrap" :class="{ '!text-[13px]': small }">{{ text }}</div>
+    <div class="ml-2 text-gray-700 text-nowrap" :class="{ '!text-[14px]': small }" v-if="text">{{ text }}</div>
   </div>
 </template>
 
@@ -58,7 +58,7 @@ const toggle = () => {
 }
 
 .checked {
-  @apply bg-primary-500;
+  @apply bg-primary-600;
 }
 
 .checked::before {
