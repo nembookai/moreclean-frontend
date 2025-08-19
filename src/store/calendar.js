@@ -24,8 +24,6 @@ export const Calendar = defineStore('calendar', () => {
   }
   
   function getTaskHeight(task) {
-    console.log(task)
-
     let duration = task.overlapping
       ? (task.duration - task.overlapping.duration)
       : task.duration;
