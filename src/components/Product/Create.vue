@@ -78,6 +78,7 @@ onBeforeMount(() => {
   if (!product.value.id) {
     product.value.pricing_type = 'hourly';
     product.value.invoice = 1;
+    product.value.economic_create = true;
   }
 });
 
@@ -120,8 +121,9 @@ const saveProduct = async () => {
 };
 
 const updateFromEconomicProduct = (pp) => {
+  product.value.economic_id = pp.productNumber;
+  
   if (!product.value.id) {
-    product.value.economic_id = pp.productNumber;
     product.value.name = pp.name;
     product.value.price = (pp.salesPrice * 100);
     product.value.description = pp.description;

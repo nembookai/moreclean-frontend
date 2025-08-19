@@ -24,6 +24,11 @@
         <DropdownWrite v-if="!economicLoading.productGroups" fillPlaceholder="Vælg produkt gruppe" :values="economicData.productGroups" :chosenValue="settings.find(s => s.key === 'product_group')?.value" @selectValue="(v) => selectSettings(v, 'product_group', 'productGroupNumber')" display="name" dropdownWidth="w-[250px]" class="!w-[250px]" :filterable="['number', 'name']" />
         <div class="input input__disabled !w-[250px] flex items-center gap-x-2" v-else><PhSpinner class="animate-spin" :size="15" />Indlæser produkt gruppe...</div>
       </div>
+      <div class="flex items-center justify-between">
+        <div class="text-gray-800 text-[14px] font-medium text-nowrap">Standard faktura layout</div>
+        <DropdownWrite v-if="!economicLoading.layouts" fillPlaceholder="Vælg faktura layout" :values="economicData.layouts" :chosenValue="settings.find(s => s.key === 'layout')?.value" @selectValue="(v) => selectSettings(v, 'layout', 'layoutNumber')" display="name" dropdownWidth="w-[250px]" class="!w-[250px]" :filterable="['number', 'name']" />
+        <div class="input input__disabled !w-[250px] flex items-center gap-x-2" v-else><PhSpinner class="animate-spin" :size="15" />Indlæser faktura layout...</div>
+      </div>
     </div>
     <div class="mt-5">
       <button class="btn btn__primary" @click="saveEconomicSettings">Gem indstillinger</button>
@@ -64,6 +69,7 @@ onBeforeMount(async () => {
   economicLoading.value.vatZones = true;
   economicLoading.value.paymentTerms = true;
   economicLoading.value.productGroups = true;
+  economicLoading.value.layouts = true;
 
   const customerGroupsPromise = axiosClient.get('/economic/single/customer-groups')
     .then((response) => {
@@ -133,12 +139,30 @@ onBeforeMount(async () => {
       economicLoading.value.productGroups = false;
     });
 
+  const layoutsPromise = axiosClient.get('/economic/single/layouts')
+    .then((response) => {
+      economicData.value.layouts = response.data;
+
+      const layoutSetting = settings.value.find(s => s.key === 'layout');
+      if (layoutSetting) {
+        layoutSetting.value = economicData.value.layouts.find(
+          l => l.layoutNumber === layoutSetting.value
+        );
+        layoutSetting.dbValue = layoutSetting.value.layoutNumber;
+      }
+    })
+    .catch((e) => { })
+    .finally(() => {
+      economicLoading.value.layouts = false;
+    });
+
   // Wait for all to finish before proceeding if needed
   await Promise.all([
     customerGroupsPromise,
     vatZonesPromise,
     paymentTermsPromise,
-    productGroupsPromise
+    productGroupsPromise,
+    layoutsPromise
   ]);
 });
 

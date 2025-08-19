@@ -17,7 +17,7 @@
     <div class="absolute top-[45px] left-0 w-[400px] bg-white shadow-sm border border-gray-200 rounded-lg p-2" v-click-outside="() => showEconomicProducts = false" v-if="showEconomicProducts">
       <input type="text" id="economic-search" autocomplete="new-password" v-model="economicSearch" @keydown.enter="selectWithEnter" class="input !mt-0" placeholder="Søg e-conomic" />
       <div class="max-h-[200px] overflow-y-auto" v-if="!economicLoading">
-        <div class="py-10 text-center text-gray-400 font-light" v-if="!economicProducts.length">Søg på firmanavn eller cvr</div>
+        <div class="py-10 text-center text-gray-400 font-light" v-if="!economicProducts.length">Søg på produkt navn</div>
         <div class="flex flex-col gap-y-1 text-gray-700 mt-2" v-else>
           <div class="flex gap-x-2 items-center even:bg-gray-100 odd:bg-gray-50 cursor-pointer hover:bg-gray-200 hover-transition active:bg-gray-300 p-2 rounded-lg" v-for="product in allEconomicProducts" :key="product.id" @click="selectEconomicProduct(product)">
             <div>{{ product.name }}</div>

@@ -136,6 +136,7 @@ onBeforeMount(() => {
     customer.value.type = 'company';
     customer.value.country = 'Danmark';
     customer.value.color = taskColors[0];
+    customer.value.economic_create = true;
   } else {
     customer.value.customer_number = customer.value.number;
   }
@@ -180,9 +181,10 @@ const saveCustomer = async () => {
 };
 
 const updateFromEconomicCustomer = (cc) => {
+  customer.value.economic_id = cc.customerNumber;
+  
   if (!customer.value.id) {
     customer.value.debit_number = cc.customerNumber;
-    customer.value.economic_id = cc.customerNumber;
     customer.value.name = cc.name;
     customer.value.email = cc.email;
     customer.value.phone = cc.telephoneAndFaxNumber;
