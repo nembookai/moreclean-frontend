@@ -130,6 +130,7 @@ const updateFromCustomer = (customer) => {
 
   if (customer.service_agreement) {
     newTask.value.service_agreement_id = customer.service_agreement.id;
+    addServiceAgreementFixedProduct();
   } 
 }
 
@@ -152,6 +153,21 @@ const updateFromProducts = (products) => {
   newTask.value.economy.fixed_price = products?.filter((p) => p.pricing_type === 'fixed')?.reduce((acc, product) => acc + product.price, 0);
   newTask.value.economy.invoice_hours_customer = products?.filter((p) => p.pricing_type === 'hourly')?.reduce((acc, product) => acc + product.hours, 0);
   newTask.value.economy.invoice_hours_employee = products?.reduce((acc, product) => acc + product.hours, 0);
+}
+
+const addServiceAgreementFixedProduct = () => {
+  newTask.value.products.push({
+    id: moment().unix(), 
+    economic_id: null, 
+    economic_unit_id: null, 
+    name: "Serviceaftale",
+    price: 0, 
+    pricing_type: "fixed", 
+    hours: newTask.value?.customer?.service_agreement?.weekly_hours ? (newTask.value.customer.service_agreement.weekly_hours * 100) : 0, 
+    description: null, 
+    invoice: 0, 
+    service_agreement_task: true,
+  });
 }
 </script>
 <style lang="scss" scoped>

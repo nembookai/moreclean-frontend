@@ -24,7 +24,7 @@
           <div class="text-[13px] text-gray-600 font-light text-center">Antal fakturaer</div>
         </div>
         <div class="col-span-3">
-          <div class="text-[15px] font-medium text-center">{{ 0 }}</div>
+          <div class="text-[15px] font-medium text-center">{{ customers.filter((customer) => customer.service_agreement)?.length }}</div>
           <div class="text-[13px] text-gray-600 font-light text-center">Antal serviceaftaler</div>
         </div>
         <div class="col-span-3">
@@ -52,25 +52,43 @@
             <div class="col-span-2 text-right">Total</div>
           </div>
           <div class="w-full mb-3">
-            <div v-for="task in customer.tasks" :key="task.id">
-              <div class="grid grid-cols-12 gap-x-10 text-[14px] text-gray-700 font-light my-1.5" :class="{ 'text-red-500': !product.economic_id }" v-for="product in task.products" :key="product.id">
+            <div v-if="customer.service_agreement">
+              <div class="grid grid-cols-12 gap-x-10 text-[14px] text-gray-700 font-light my-1.5" v-for="(product, index) in customer.service_agreement.invoice_lines" :key="index">
                 <div class="col-span-5">
-                  <div class="inline relative" v-if="!product.economic_id" >
-                    <img src="img/economic.png" class="w-3 h-3 inline-block mr-1" />
-                    <span class="text-[12px] font-light">(mangler)</span>
-                  </div>
-                  {{ product.name }}, {{ moment(task.date).format('DD/MM/YYYY') }}
+                  {{ product.name }}, {{ customer.service_agreement.start_date }} - {{ customer.service_agreement.end_date }}
                 </div>
                 <div class="col-span-2">
-                  <span v-if="product.pricing_type === 'hourly'">{{ formatPrice(product.hours) }} timer</span>
-                  <span v-else>pr opgave</span>
+                  Fast aftale
                 </div>
-                <div class="col-span-3">kr. {{ formatPrice(product.price) }}</div>
+                <div class="col-span-3">
+                  {{ formatPrice(product.price) }} kr.
+                </div>
                 <div class="col-span-2 text-right font-medium">
-                  <span v-if="product.pricing_type === 'hourly'">{{ formatPrice((product.price) * (product.hours / 100)) }} kr.</span>
-                  <span v-else>{{ formatPrice(product.price) }} kr.</span>
+                  {{ formatPrice(product.price * (1 - (product.discount / 100))) }} kr.
                 </div>
               </div>
+            </div>
+            <div v-for="task in customer.tasks" :key="task.id">
+              <template v-for="product in task.products" :key="product.id">
+                <div class="grid grid-cols-12 gap-x-10 text-[14px] text-gray-700 font-light my-1.5" :class="{ 'text-red-500': !product.economic_id }" v-if="!product.service_agreement_task">
+                  <div class="col-span-5">
+                    <div class="inline relative" v-if="!product.economic_id" >
+                      <img src="img/economic.png" class="w-3 h-3 inline-block mr-1" />
+                      <span class="text-[12px] font-light">(mangler)</span>
+                    </div>
+                    {{ product.name }}, {{ moment(task.date).format('DD/MM/YYYY') }}
+                  </div>
+                  <div class="col-span-2">
+                    <span v-if="product.pricing_type === 'hourly'">{{ formatPrice(product.hours) }} timer</span>
+                    <span v-else>pr opgave</span>
+                  </div>
+                  <div class="col-span-3">kr. {{ formatPrice(product.price) }}</div>
+                  <div class="col-span-2 text-right font-medium">
+                    <span v-if="product.pricing_type === 'hourly'">{{ formatPrice((product.price) * (product.hours / 100)) }} kr.</span>
+                    <span v-else>{{ formatPrice(product.price) }} kr.</span>
+                  </div>
+                </div>
+              </template>
             </div>
             <div class="flex w-full items-end flex-col mt-3 border-t border-gray-200 pt-3">
               <div class="w-[300px] text-right text-[14px]">Ialt. {{ formatPrice(getTotal(customer)) }} kr</div>
@@ -131,6 +149,14 @@ async function getApi() {
   }).then((response) => {
     customers.value = response.customers;
     allCustomers.value = response.all_customers;
+
+    customers.value.forEach((customer) => {
+      if (customer.service_agreement) {
+        customer.service_agreement.total_price = calculateServiceAgreementPrice(customer.service_agreement);
+        customer.service_agreement.start_date = moment(settings.value.date.start).format('DD/MM/YYYY');
+        customer.service_agreement.end_date = moment(settings.value.date.end).format('DD/MM/YYYY');
+      }
+    });
   }).catch((err) => { });
 
   loading.reset();
@@ -144,7 +170,7 @@ async function search(newSettings) {
 }
 
 function getTotal(customer) {
-  return customer.tasks?.reduce((acc, task) => {
+  let allProducts = customer.tasks?.reduce((acc, task) => {
     return acc + task.products?.reduce((acc, product) => {
       if (product.pricing_type === 'hourly') {
         return acc + (product.price * (product.hours / 100));
@@ -153,6 +179,12 @@ function getTotal(customer) {
       }
     }, 0);
   }, 0);
+
+  if (customer.service_agreement) {
+    return allProducts + customer.service_agreement.total_price;
+  } else {
+    return allProducts;
+  }
 }
 
 async function sendToEconomic(customer = null) {
@@ -169,6 +201,13 @@ async function sendToEconomic(customer = null) {
 const economicCustomers = computed(() => {
   return customers.value.filter((customer) => customer.economic_id);
 });
+
+function calculateServiceAgreementPrice(serviceAgreement) {
+  let days = moment(settings.value.date.end).add(1, 'days').diff(moment(settings.value.date.start), 'days');
+  let dailyPrice = serviceAgreement.price / moment(settings.value.date?.start).daysInMonth();
+
+  return (days * dailyPrice);
+}
 /******************************
  * Lifecycle hooks
  ******************************/

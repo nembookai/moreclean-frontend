@@ -16,8 +16,8 @@
             <input type="text" id="name" v-model="serviceAgreement.name" class="input !mt-0" autocomplete="new-password" placeholder="Tilføj navn" />
           </div>
           <div class="col-span-2">
-            <label class="text-gray-600 text-[13px]">Normtid pr uge <span>(Antal timer)</span></label>
-            <input type="number" id="norm_hours" v-model="serviceAgreement.weekly_hours" class="input !mt-0" autocomplete="new-password" placeholder="Tilføj normtid" />
+            <label class="text-gray-600 text-[13px]">Time pr opgave</label>
+            <input type="number" id="norm_hours" v-model="serviceAgreement.weekly_hours" class="input !mt-0" autocomplete="new-password" placeholder="Tilføj time pr opgave" />
           </div>
           <div class="col-span-full -mb-2 bg-primary-600 text-white w-fit px-2 mt-3 rounded text-[18px]">Faktura oplysninger</div>
           <div class="col-span-4">
@@ -129,7 +129,7 @@ async function save() {
   }
 
   if (!serviceAgreement.value.invoice_lines.every(line => line.product && line.name && line.price)) {
-    message.showError('Du skal udfylde alle felter på alle linjer');
+    message.showError('Du skal udfylde alle faktura linjer');
     return;
   }
 

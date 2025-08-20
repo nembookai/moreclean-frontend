@@ -36,7 +36,7 @@
                 <div class="flex items-center gap-x-1 input !h-[32.5px] input__disabled !mt-0">{{ p.name }}</div>
               </div>
               <CurrencyInput value-scaling="precision" class="input !mt-0 col-span-2 !h-[32.5px]" name="product_price" v-model="p.hours" />
-              <div class="col-span-1 flex items-center justify-end gap-x-1 pr-3">
+              <div class="col-span-1 flex items-center justify-end gap-x-1 pr-3" v-if="!p.service_agreement_task">
                 <PhX :size="16" weight="regular" class="text-red-500 cursor-pointer hover-transition hover:text-red-700 active:text-red-900" @click.stop="removeProduct(p)" />
               </div>
             </div>

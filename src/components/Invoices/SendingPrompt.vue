@@ -96,7 +96,7 @@ const progressPercent = computed(() => {
 });
 
 function getTotal(customer) {
-  return customer.tasks?.reduce((acc, task) => {
+  let allProducts = customer.tasks?.reduce((acc, task) => {
     return acc + task.products?.reduce((acc, product) => {
       if (product.pricing_type === 'hourly') {
         return acc + (product.price * (product.hours / 100));
@@ -105,6 +105,12 @@ function getTotal(customer) {
       }
     }, 0);
   }, 0);
+
+  if (customer.service_agreement) {
+    return allProducts + customer.service_agreement.total_price;
+  } else {
+    return allProducts;
+  }
 }
 
 async function sendToEconomic() {
