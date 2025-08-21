@@ -161,6 +161,11 @@
               Rediger opgave
             </button>
           </div>
+          <div v-if="tasks.activeTask.recurring?.enabled && !tasks.activeTask.recurring_id" class="flex justify-end -mt-3">
+            <div class="text-[13px] w-auto bg-yellow-100 text-yellow-600 rounded-md px-3 font-light">
+              Ops denne opgave har gentagende opgaver.
+            </div>
+          </div>
         </div>
       </template>
       <Task-Edit class="p-5" v-else :task="tasks.activeTask" @close="showEditTask = false" @updated="tasks.updateTask" />
