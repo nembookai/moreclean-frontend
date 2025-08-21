@@ -9,7 +9,7 @@
     <div class="flex gap-x-5 items-center" v-if="!loading.loading">
       <div class="relative z-[20]">
         <button class="btn btn__lightgray btn__small" @click="filterOpen = !filterOpen"><PhFunnel weight="bold" :size="16" />Søg og filtrer</button>
-        <Invoices-Filter v-if="filterOpen" @close="filterOpen = false" v-click-outside="() => filterOpen = false" :customers="allCustomers" @search="search" v-model:settings="settings" /> 
+        <Invoices-Filter v-if="filterOpen" @close="filterOpen = false" v-click-outside="() => filterOpen = false" :customers="company.customers" @search="search" v-model:settings="settings" /> 
       </div>
       <div class="underline underline-offset-1 text-orange-500 text-[13px] cursor-pointer" @click="sendToEconomic()" v-if="customers.length">Send alle {{ economicCustomers?.length }} fakturaer til economic</div>
     </div>
@@ -113,6 +113,7 @@ import { PhFunnel, PhBuilding, PhUser, PhXCircle } from '@phosphor-icons/vue';
 import { axiosClient } from '@/lib/axiosClient';
 import { formatPrice } from '@/composables/Price';
 import moment from 'moment';
+import { Company } from '@/store/company';
 
 /******************************
  * Refs
@@ -131,6 +132,7 @@ const customers = ref([]);
 const filterOpen = ref(false);
 const sendingPrompt = ref(false);
 const sendingCustomer = ref([]);
+const company = Company();
 
 /******************************
  * Methods & computed
@@ -148,7 +150,6 @@ async function getApi() {
     }
   }).then((response) => {
     customers.value = response.customers;
-    allCustomers.value = response.all_customers;
 
     customers.value.forEach((customer) => {
       if (customer.service_agreement) {
