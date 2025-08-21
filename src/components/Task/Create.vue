@@ -11,7 +11,7 @@
         <Task-Creation-DatePicker v-model:recurring="newTask.recurring" v-model:date="newTask.date" v-model:startTime="newTask.start_time" v-model:endTime="newTask.end_time" />
         <Task-Creation-Location v-model:location="newTask.location" />
         <Task-Creation-Economy v-if="!newTask.service_agreement_id" v-model:economy="newTask.economy" :start="newTask.start_time" :end="newTask.end_time" :products="newTask.products" :employees="newTask.employees" :customer="newTask.customer" />
-        <Task-Creation-ColorPicker v-model:color="newTask.color" />
+        <Task-Creation-ColorPicker v-model:color="newTask.color" v-model:colorManuallyChanged="colorManuallyChanged" />
         <div class="col-span-full mt-1">
           <div class="text-gray-600 text-[13px] mb-1">Beskrivelse</div>
           <QuillEditor theme="snow" contentType="html" v-model:content="newTask.description" />
@@ -69,6 +69,7 @@ const loading = ref(false);
 const emit = defineEmits(['close', 'created']);
 const message = inject('message');
 const company = Company();
+const colorManuallyChanged = ref(false);
 
 /******************************
  * Methods
@@ -87,6 +88,10 @@ const createTask = async () => {
   if (!newTask.value.location) {
     message.showError('Du skal vælge en lokation');
     return;
+  }
+
+  if (!newTask.value.employees?.length && !colorManuallyChanged.value) {
+    newTask.value.color = taskColors[7];
   }
   
   loading.value = true;
@@ -131,11 +136,15 @@ const updateFromCustomer = (customer) => {
   if (customer.service_agreement) {
     newTask.value.service_agreement_id = customer.service_agreement.id;
     addServiceAgreementFixedProduct();
-  } 
+  } else {
+    newTask.value.service_agreement_id = null;
+    removedServiceAgreementFixedProduct();
+  }
 }
 
 const removeServiceAgreement = () => {
   newTask.value.service_agreement_id = null;
+  removedServiceAgreementFixedProduct();
 }
 
 const updateFromProducts = (products) => {
@@ -168,6 +177,10 @@ const addServiceAgreementFixedProduct = () => {
     invoice: 0, 
     service_agreement_task: true,
   });
+}
+
+const removedServiceAgreementFixedProduct = () => {
+  newTask.value.products = newTask.value.products.filter((p) => p.service_agreement_task !== true);
 }
 </script>
 <style lang="scss" scoped>

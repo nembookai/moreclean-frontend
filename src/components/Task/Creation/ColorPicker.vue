@@ -25,6 +25,7 @@ import { taskColors } from '@/composables/globalHelper';
  * Refs & const
 ******************************/
 const color = defineModel('color');
+const colorManuallyChanged = defineModel('colorManuallyChanged');
 const isOpen = ref(false);
 
 /******************************
@@ -38,5 +39,6 @@ async function changeColor (colorNew) {
   color.value = colorNew;
   await nextTick();
   isOpen.value = false;
+  colorManuallyChanged.value = true;
 }
 </script>
