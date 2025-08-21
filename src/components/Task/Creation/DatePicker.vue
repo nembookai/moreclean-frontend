@@ -13,8 +13,8 @@
       <PhCaretUp :size="16" weight="bold" class="absolute right-[10px] top-[-3px] cursor-pointer hover-transition hover:text-primary-600 active:text-primary-800 select-none" @click.stop="isOpen = false" />
       <div class="text-gray-700 text-[13px] font-medium leading-[15px]">Vælg dato & tidspunkt</div>
       <div class="flex gap-x-1.5 mt-2">
-        <VueDatePicker locale="da" :format-locale="da" v-if="!is_recurring" text-input v-model="date" :clearable="false" :enable-time-picker="false" model-type="yyyy-MM-dd" :close-on-auto-apply="true" :auto-apply="true" format="dd. MMM yyyy" class="w-[160px]"></VueDatePicker>
-        <div class="h-[37.5px] px-1 flex items-center text-sm justify-center text-gray-500 font-light bg-gray-200" :class="{ 'ml-3': !is_recurring }">kl.</div>
+        <VueDatePicker locale="da" :format-locale="da" text-input v-model="date" :clearable="false" :enable-time-picker="false" model-type="yyyy-MM-dd" :close-on-auto-apply="true" :auto-apply="true" format="dd. MMM yyyy" class="w-[160px]"></VueDatePicker>
+        <div class="h-[37.5px] px-1 flex items-center text-sm justify-center text-gray-500 font-light bg-gray-200">kl.</div>
         <div class="relative">
           <PhClock :size="15" weight="bold" class="text-primary-600 absolute top-[11.5px] left-[10px] z-[10]" />
           <DropdownWrite fillPlaceholder="Vælg start tidspunkt" :showArrowDropdown="false" :values="times" :chosenValue="startTime" @selectValue="(time) => selectTime(time, 'start')" display="value" dropdownWidth="w-[150px]" class="!mt-0" overwriteInput="!w-[100px] !pl-8 !h-[37.5px] !m-0 hover:!bg-primary-50 hover:!border-gray-200 hover:!shadow-none !transition-all !ease-in-out !duration-300" :filterable="['value']" />
@@ -26,8 +26,8 @@
           <div v-if="!endChanged" class="text-[11px] text-gray-500 font-light">2 timer automatisk</div>
         </div>
       </div>
-      <LayoutComponents-Toggle class="mt-3" v-model="recurring.enabled" text="Gentagelse" small v-if="!is_recurring" />
-      <div v-if="recurring.enabled && !is_recurring" class="mt-3 text-sm">
+      <LayoutComponents-Toggle class="mt-3" v-model="recurring.enabled" text="Gentagelse" small />
+      <div v-if="recurring.enabled" class="mt-3 text-sm">
         <div class="text-sm text-gray-600">Gentag hver</div>
         <div class="flex gap-2 items-center mt-[-2px]">
           <input type="number" min="1" v-model="recurring.interval" class="input !w-[80px]" />            
@@ -63,7 +63,6 @@
         <div class="mt-4 text-sm text-gray-600">Gentag indtil <span class="font-light">(afslut)</span></div>
         <VueDatePicker locale="da" :format-locale="da" v-model="recurring.ending_at" :clearable="true" :enable-time-picker="false" model-type="yyyy-MM-dd" :close-on-auto-apply="true" :auto-apply="true" format="dd. MMM yyyy" class="w-[160px] !mt-[2px]" />
       </div>
-      <div v-if="is_recurring" @click="$emit('changeRecurring')" class="text-primary-500 hover:text-primary-600 active:text-primary-700 w-fit underline cursor-pointer mt-2 text-[14px]">Ændre gentagelse på original opgave</div>
     </div>
   </div>
 </template>
@@ -78,8 +77,6 @@ import { da } from 'date-fns/locale';
 import { times } from '@/composables/globalHelper';
 import { Tasks } from '@/store/tasks';
 
-const props = defineProps(['is_recurring']);
-
 /******************************
  * Refs & const
 ******************************/
@@ -91,7 +88,6 @@ const isOpen = ref(false);
 const recurring = defineModel('recurring');
 const daysOfWeek = ['Man', 'Tir', 'Ons', 'Tor', 'Fre', 'Lør', 'Søn'];
 const tasks = Tasks();
-const emit = defineEmits(['changeRecurring']);
 
 /******************************
  * Methods

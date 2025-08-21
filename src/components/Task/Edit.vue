@@ -4,7 +4,7 @@
       <Task-Creation-Customer v-model:customer="newTask.customer" :lastCustomerNumber="company.lastCustomerNumber" :prefillServiceAgreement="newTask.service_agreement" :loading="company.loading.customers" :allCustomers="company.customers" @updateFromCustomer="updateFromCustomer" @removeServiceAgreement="removeServiceAgreement" />
       <Task-Creation-Employees v-model:employees="newTask.employees" :loading="company.loading.employees" :allEmployees="company.employees" />
       <Task-Creation-Products v-model:products="newTask.products" :loading="company.loading.products" :manually_changed="newTask.economy.manually_changed" :allProducts="company.products" @updateFromProducts="updateFromProducts" />
-      <Task-Creation-DatePicker v-model:recurring="newTask.recurring" :is_recurring="task.recurring_id" @changeRecurring="$emit('changeRecurring')" v-model:date="newTask.date" v-model:startTime="newTask.start_time" v-model:endTime="newTask.end_time" />
+      <Task-Creation-DatePicker v-model:recurring="newTask.recurring" v-model:date="newTask.date" v-model:startTime="newTask.start_time" v-model:endTime="newTask.end_time" />
       <Task-Creation-Location v-model:location="newTask.location" />
       <Task-Creation-Economy v-if="!newTask.service_agreement_id" v-model:economy="newTask.economy" :start="newTask.start_time" :end="newTask.end_time" :products="newTask.products" :employees="newTask.employees" :customer="newTask.customer" />
       <Task-Creation-ColorPicker v-model:color="newTask.color" />
@@ -31,6 +31,10 @@
               <div><PhPen :size="16" weight="fill" /></div>
               Gem alle opgaver
             </div>
+            <div class="hover_dropdown hover_dropdown__small" @click="editTask(4)">
+              <div><PhPen :size="16" weight="fill" /></div>
+              Gem denne & følgende opgaver
+            </div>
             <div class="hover_dropdown hover_dropdown__small" @click="editTask(3)">
               <div><PhPen :size="16" weight="fill" /></div>
               Gem og frigør opgaven
@@ -56,7 +60,7 @@ const props = defineProps(['task']);
  * Refs & consts
 ******************************/
 const message = inject('message');
-const emit = defineEmits(['close', 'updated', 'changeRecurring']);
+const emit = defineEmits(['close', 'updated']);
 const company = Company();
 const loading = ref(false);
 const newTask = ref({
@@ -98,7 +102,7 @@ const editTask = async (method) => {
     newTask.value.id = props.task.recurring_id;
   }
 
-  if (method === 3) {
+  if (method === 3 || method === 4) {
     id = null;
     newTask.value.id = null;
   }
@@ -109,6 +113,10 @@ const editTask = async (method) => {
     start_time: newTask.value.start_time?.value || null,
     end_time: newTask.value.end_time?.value || null,
   }).then((response) => {
+    if (response.force_reload) {
+      window.location.reload();
+    }
+
     message.showComplete('Opgaven er opdateret');
     emit('updated', response.tasks);
     emit('close');

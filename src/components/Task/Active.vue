@@ -163,7 +163,7 @@
           </div>
         </div>
       </template>
-      <Task-Edit class="p-5" v-else :task="tasks.activeTask" @changeRecurring="changeRecurring" @close="showEditTask = false" @updated="tasks.updateTask" />
+      <Task-Edit class="p-5" v-else :task="tasks.activeTask" @close="showEditTask = false" @updated="tasks.updateTask" />
     </div>
   </div>
 </template>
@@ -221,11 +221,6 @@ const deleteFromMethod = (method) => {
   deleteMethod.value = method;
   deleteTask.value = true;
 };
-
-const changeRecurring = () => {
-  showEditTask.value = false;
-  tasks.setActiveTask(tasks.activeTask.recurring_id, true);
-}
 
 const earnings = computed(() => {
   return (((tasks.activeTask.economy.invoice_hours_customer / 100) * tasks.activeTask.economy.hourly_price) + tasks.activeTask.economy.fixed_price);
