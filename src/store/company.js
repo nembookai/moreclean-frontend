@@ -9,6 +9,7 @@ export const Company = defineStore('company', () => {
   const lastCustomerNumber = ref(0);
   const employees = ref([]);
   const products = ref([]);
+  const areas = ref([]);
   const loading = ref({
     customers: true,
     employees: true,
@@ -40,15 +41,22 @@ export const Company = defineStore('company', () => {
     loading.value.products = false;
   }
 
+  async function getAreas() {
+    await axiosClient.get('settings?type=areas').then((response) => {
+      areas.value = response.settings.find(s => s.key === 'areas')?.value || [];
+    }).catch((e) => { });
+  }
+
   async function init() {
     await getCustomers();
     await getEmployees();
     await getProducts();
+    await getAreas();
   }
 
   function addToLastCustomerNumber() {
     lastCustomerNumber.value += 1;
   }
 
-  return { customers, lastCustomerNumber, employees, products, loading, init, addToLastCustomerNumber }
+  return { customers, lastCustomerNumber, employees, products, areas, loading, init, addToLastCustomerNumber }
 });

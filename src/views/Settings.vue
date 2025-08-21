@@ -30,6 +30,21 @@
         <div class="input input__disabled !w-[250px] flex items-center gap-x-2" v-else><PhSpinner class="animate-spin" :size="15" />Indlæser faktura layout...</div>
       </div>
     </div>
+    <div class="font-medium mb-3 mt-8">Virksomhed</div>
+    <div class="flex flex-col gap-y-3 w-[600px]">
+      <div class="text-gray-800 text-[14px] font-medium text-nowrap">Områder (postnumre)</div>
+      <div class="flex flex-col gap-y-2">
+        <div class="flex items-center gap-x-2" v-for="(area, index) in areas" :key="index">
+          <input type="number" class="input !mt-0 !w-[100px]" v-model="area.from" placeholder="Fra" />
+          <span class="text-gray-500">-</span>
+          <input type="number" class="input !mt-0 !w-[100px]" v-model="area.to" placeholder="Til" />
+          <div class="text-red-500 text-[13px] font-light cursor-pointer hover-transition hover:text-red-500 active:text-red-600" @click="removeArea(index)"><PhX :size="16" weight="bold" /></div>
+        </div>
+        <div class="w-auto">
+          <div class="text-green-500 text-[13px] font-light cursor-pointer hover-transition underline hover:text-green-600 active:text-green-700 inline-flex items-center gap-x-1" @click="addArea"><PhPlus :size="16" weight="bold" /> Tilføj ny område</div>
+        </div>
+      </div>
+    </div>
     <div class="mt-5">
       <button class="btn btn__primary" @click="saveEconomicSettings">Gem indstillinger</button>
     </div>
@@ -41,7 +56,7 @@
 ******************************/
 import { ref, onBeforeMount, inject } from 'vue';
 import { axiosClient } from '@/lib/axiosClient'
-import { PhSpinner } from '@phosphor-icons/vue';
+import { PhSpinner, PhPlus, PhX } from '@phosphor-icons/vue';
 
 /*******************************
 * Refs & variables
@@ -51,6 +66,7 @@ const loading = inject('loading');
 const settings = ref([]);
 const economicLoading = ref({});
 const economicData = ref({});
+const areas = ref([]);
 
 /*******************************
 * Lifecycle hooks
@@ -60,6 +76,19 @@ onBeforeMount(async () => {
 
   await axiosClient.get('/settings').then((response) => {
     settings.value = response.settings;
+    const areasSetting = settings.value.find(s => s.key === 'areas');
+    if (areasSetting) {
+      try {
+        const values = Array.isArray(areasSetting.value) ? areasSetting.value : (typeof areasSetting.value === 'string' ? JSON.parse(areasSetting.value) : []);
+        areas.value = values.map(r => {
+          const [from, to] = (r || '').toString().split('-');
+          return { from, to };
+        }).filter(a => a.from || a.to);
+      } catch (e) {
+        // Fallback if value is not JSON
+        areas.value = [];
+      }
+    }
   }).catch((e) => { });
 
   loading.reset();
@@ -182,8 +211,26 @@ const selectSettings = (value, key, dbValue) => {
 }
 
 const saveEconomicSettings = () => {
+  // Persist areas into settings as array of "from-to" strings
+  const ranges = areas.value
+    .filter(a => a.from && a.to)
+    .map(a => `${a.from}-${a.to}`);
+  if (settings.value.find(s => s.key === 'areas')) {
+    settings.value = settings.value.map(s => s.key === 'areas' ? { ...s, value: ranges, dbValue: ranges } : s);
+  } else {
+    settings.value.push({ key: 'areas', value: ranges, dbValue: ranges });
+  }
+
   axiosClient.post('/settings', settings.value).then((response) => {
     message.showComplete('Indstillinger gemt');
   }).catch((e) => { });
+}
+
+const addArea = () => {
+  areas.value.push({ from: '', to: '' });
+}
+
+const removeArea = (index) => {
+  areas.value.splice(index, 1);
 }
 </script>

@@ -63,9 +63,9 @@
           <input type="text" id="contact_person_email" v-model="customer.contact_person_email" class="input !mt-0" autocomplete="new-password" placeholder="Kontaktperson e-mail" />
         </div>
         <div class="col-span-full -mb-2 bg-primary-600 text-white w-fit px-2 mt-4 rounded text-[18px]">Kunde adresse</div>
-        <div class="col-span-5">
+        <div class="col-span-5 relative">
           <label class="text-gray-600 text-[13px]">Adresse</label>
-          <input type="text" ref="locationInput" id="adresse" autocomplete="one-time-code" v-model="customer.address" class="input !mt-0" placeholder="Kundens adresse" />
+          <input type="text" ref="customerAddressInput" id="customer-address" autocomplete="new-password"  v-model="customer.address" class="input !mt-0" placeholder="Kundens adresse" />
         </div>
         <div class="col-span-1">
           <label class="text-gray-600 text-[13px]">Post nr.</label>
@@ -114,7 +114,7 @@
 /*******************************
  * Imports & props
  ******************************/
-import { ref, onBeforeMount, inject } from 'vue';
+import { ref, onBeforeMount, onMounted, inject } from 'vue';
 import { axiosClient } from '@/lib/axiosClient';
 import { taskColors } from '@/composables/globalHelper';
 
@@ -125,6 +125,7 @@ const props = defineProps(['prefill', 'lastCustomerNumber']);
  ******************************/
 const emit = defineEmits(['close', 'updated', 'created']);
 const customer = ref({ ...props.prefill });
+const customerAddressInput = ref(null);
 const message = inject('message');
 
 /*******************************
@@ -140,6 +141,19 @@ onBeforeMount(() => {
   } else {
     customer.value.customer_number = customer.value.number;
   }
+});
+
+onMounted(() => {
+  const el = document.getElementById('customer-address');
+  if (!el || !window?.dawaAutocomplete?.dawaAutocomplete) return;
+
+  window.dawaAutocomplete.dawaAutocomplete(el, {
+    select: function(selected) {
+      customer.value.address = selected.data?.vejnavn;
+      customer.value.zip = selected.data?.postnr;
+      customer.value.city = selected.data?.postnrnavn;
+    }
+  });
 });
 
 /*******************************
@@ -213,3 +227,59 @@ const changeCustomerColorType = () => {
   }
 }
 </script>
+<style lang="scss" scoped>
+:deep(.autocomplete-container) {
+  /* relative position for at de absolut positionerede forslag får korrekt placering.*/
+  position: relative;
+  width: 100%;
+  max-width: 30em;
+}
+:deep(.autocomplete-container input) {
+  /* Både input og forslag får samme bredde som omkringliggende DIV */
+  width: 100%;
+  box-sizing: border-box;
+}
+:deep(.dawa-autocomplete-suggestions) {
+  margin: 0.3em 0 0 0;
+  padding: 0;
+  text-align: left;
+  border-radius: 0.3125em;
+  background: white;
+  box-shadow: 0 0.0625em 0.15625em rgba(0,0,0,.15);
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  font-size: 12.5px;
+  overflow-y: auto;
+  box-sizing: border-box;
+  width: 350px;
+  max-height: 200px;
+}
+:deep(.dawa-autocomplete-suggestions .dawa-autocomplete-suggestion) {
+  margin: 0;
+  list-style: none;
+  cursor: pointer;
+  padding: 10px 0.6em;
+  color: #333;
+  border: 0.0625em solid #ddd;
+  border-bottom-width: 0;
+}
+:deep(.dawa-autocomplete-suggestions .dawa-autocomplete-suggestion:first-child) {
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+}
+:deep(.dawa-autocomplete-suggestions .dawa-autocomplete-suggestion:last-child) {
+  border-bottom-left-radius: inherit;
+  border-bottom-right-radius: inherit;
+  border-bottom-width: 0.0625em;
+}
+
+:deep(.dawa-autocomplete-suggestions .dawa-autocomplete-suggestion.dawa-selected) {
+  @apply bg-primary-100 text-primary-700;
+}
+
+:deep(.dawa-autocomplete-suggestions .dawa-autocomplete-suggestion:hover) {
+  @apply bg-primary-500 text-white transition-all duration-150 ease-in;
+}
+</style>

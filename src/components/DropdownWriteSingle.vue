@@ -125,6 +125,6 @@ watch(() => props.chosenValue, () => {
 </script>
 <style>
 .dropdown-box {
-  @apply absolute top-0 right-0 bg-primary-800 text-white h-[calc(100%-8px)] m-1 w-[32px] flex items-center justify-center rounded-[6px] cursor-pointer transition-all ease-in-out duration-300 group-hover:bg-primary-700 group-active:bg-primary-900;
+  @apply absolute top-0 right-0 bg-primary-500 text-white h-[calc(100%-8px)] m-1 w-[32px] flex items-center justify-center rounded-[6px] cursor-pointer transition-all ease-in-out duration-300 group-hover:bg-primary-600 group-active:bg-primary-700;
 }
 </style>

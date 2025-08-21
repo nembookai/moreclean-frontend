@@ -205,6 +205,10 @@ const filterLength = computed(() => {
     length += 1;
   }
 
+  if (tasks.activeFilter.areas && tasks.activeFilter.areas.length) {
+    length += 1;
+  }
+
   return length;
 })
 </script>

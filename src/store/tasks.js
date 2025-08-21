@@ -16,7 +16,8 @@ export const Tasks = defineStore('tasks', () => {
   const activeFilter = ref({
     customers: [],
     employees: [],
-    to_handle: false
+    to_handle: false,
+    areas: []
   })
 
   async function init() {
@@ -226,6 +227,20 @@ export const Tasks = defineStore('tasks', () => {
         // Filter by "to handle" (no employees assigned)
         if (activeFilter.value.to_handle && task.employees?.length) {
           return false;
+        }
+
+        // Filter by areas (task.customer.zip falls into any selected area range string "from-to")
+        if (activeFilter.value.areas?.length) {
+          const zip = Number(task.customer?.zip);
+          if (!Number.isFinite(zip)) return false;
+          const matches = activeFilter.value.areas.some(area => {
+            const [fromStr, toStr] = (area.name || area).toString().split('-');
+            const from = Number(fromStr);
+            const to = Number(toStr);
+            if (!Number.isFinite(from) || !Number.isFinite(to)) return false;
+            return zip >= from && zip <= to;
+          });
+          if (!matches) return false;
         }
   
         return true;
