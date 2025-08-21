@@ -58,5 +58,5 @@ export const Company = defineStore('company', () => {
     lastCustomerNumber.value += 1;
   }
 
-  return { customers, lastCustomerNumber, employees, products, areas, loading, init, addToLastCustomerNumber }
+  return { customers, lastCustomerNumber, employees, products, areas, loading, init, addToLastCustomerNumber, getCustomers, getEmployees, getProducts, getAreas }
 });

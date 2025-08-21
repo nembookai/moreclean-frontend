@@ -89,6 +89,7 @@
  ******************************/
 import { ref, onBeforeMount, inject } from 'vue';
 import { axiosClient } from '@/lib/axiosClient';
+import { Company } from '@/store/company';
 
 const props = defineProps(['prefill']);
 
@@ -98,6 +99,7 @@ const props = defineProps(['prefill']);
 const emit = defineEmits(['close', 'updated', 'created']);
 const employee = ref({ ...props.prefill });
 const message = inject('message');
+const company = Company();
 
 /*******************************
  * Lifecycle hooks
@@ -124,6 +126,7 @@ const saveEmployee = async () => {
   const url = employee.value.id ? `/employees/${employee.value.id}` : '/employees';
 
   await axiosClient.post(url, employee.value).then((response) => {
+    company.getEmployees();
     message.showComplete('Medarbejderen oprettet');
 
     if (employee.value.id) {

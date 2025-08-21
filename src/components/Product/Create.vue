@@ -61,6 +61,7 @@
  ******************************/
 import { ref, onBeforeMount, inject } from 'vue';
 import { axiosClient } from '@/lib/axiosClient';
+import { Company } from '@/store/company';
 
 const props = defineProps(['prefill']);
 
@@ -70,6 +71,7 @@ const props = defineProps(['prefill']);
 const emit = defineEmits(['close', 'updated', 'created']);
 const product = ref({ ...props.prefill });
 const message = inject('message');
+const company = Company();
 
 /*******************************
  * Lifecycle hooks
@@ -97,6 +99,7 @@ const saveProduct = async () => {
   const url = product.value.id ? `/products/${product.value.id}` : '/products';
 
   await axiosClient.post(url, product.value).then(async (response) => {
+    company.getProducts();
     message.showComplete('Produktet oprettet');
     productToEmit = response.product;
 

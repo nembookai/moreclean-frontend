@@ -117,6 +117,7 @@
 import { ref, onBeforeMount, onMounted, inject } from 'vue';
 import { axiosClient } from '@/lib/axiosClient';
 import { taskColors } from '@/composables/globalHelper';
+import { Company } from '@/store/company';
 
 const props = defineProps(['prefill', 'lastCustomerNumber']);
 
@@ -127,6 +128,7 @@ const emit = defineEmits(['close', 'updated', 'created']);
 const customer = ref({ ...props.prefill });
 const customerAddressInput = ref(null);
 const message = inject('message');
+const company = Company();
 
 /*******************************
  * Lifecycle hooks
@@ -176,6 +178,7 @@ const saveCustomer = async () => {
   const url = customer.value.id ? `/customers/${customer.value.id}` : '/customers';
 
   await axiosClient.post(url, customer.value).then(async (response) => {
+    company.getCustomers();
     message.showComplete('Kunden oprettet');
     customerToEmit = response.customer;
 
@@ -192,8 +195,7 @@ const saveCustomer = async () => {
       }).catch((e) => { });
     }
 
-    emit('created', customerToEmit);
-    
+    emit('created', customerToEmit); 
   }).catch((e) => { });
 
   message.loading = false;
