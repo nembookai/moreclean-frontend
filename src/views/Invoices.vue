@@ -53,8 +53,12 @@
           </div>
           <div class="w-full mb-3">
             <div v-if="customer.service_agreement">
-              <div class="grid grid-cols-12 gap-x-10 text-[14px] text-gray-700 font-light my-1.5" v-for="(product, index) in customer.service_agreement.invoice_lines" :key="index">
+              <div class="grid grid-cols-12 gap-x-10 text-[14px] text-gray-700 font-light my-1.5" :class="{ 'text-red-500': !product.economic_id }" v-for="(product, index) in customer.service_agreement.invoice_lines" :key="index">
                 <div class="col-span-5">
+                  <div class="inline relative" v-if="!product.economic_id">
+                    <img src="img/economic.png" class="w-3 h-3 inline-block mr-1" />
+                    <span class="text-[12px] font-light">(mangler)</span>
+                  </div>
                   {{ product.name }}, {{ customer.service_agreement.start_date }} - {{ customer.service_agreement.end_date }}
                 </div>
                 <div class="col-span-2">

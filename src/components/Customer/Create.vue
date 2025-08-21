@@ -23,13 +23,13 @@
         </div>
         <div class="col-span-2">
           <label class="text-gray-600 text-[13px]">Kundetype <span class="text-red-500">*</span></label>
-          <select id="type" v-model="customer.type" class="input !mt-0">
+          <select id="type" v-model="customer.type" class="input !mt-0" @change="changeCustomerColorType">
             <option value="person">Privat</option>
             <option value="company">Virksomhed</option>
           </select>
         </div>
         <div class="col-span-2">
-          <label class="text-gray-600 text-[13px]" v-if="customer.type === 'company'">CVR</label>
+          <label class="text-gray-600 text-[13px]" v-if="customer.type === 'company'">CVR <span class="text-red-500" v-if="customer.type === 'company'">*</span></label>
           <label class="text-gray-600 text-[13px]" v-else>CPR</label>
           <input type="text" id="cvr" v-model="customer.cvr" class="input !mt-0" autocomplete="new-password" :placeholder="customer.type === 'company' ? 'CVR nummer' : 'CPR nummer'" />
         </div>
@@ -39,7 +39,7 @@
         </div>
         <div class="col-span-full -mb-2 bg-primary-600 text-white w-fit px-2 mt-4 rounded text-[18px]">Kontaktoplysninger</div>
         <div :class="customer.type === 'company' ? 'col-span-2' : 'col-span-3'">
-          <label class="text-gray-600 text-[13px]">E-mail</label>
+          <label class="text-gray-600 text-[13px]">E-mail <span class="text-red-500">*</span></label>
           <input type="text" id="email" v-model="customer.email" class="input !mt-0" autocomplete="new-password" placeholder="E-mail" />
         </div>
         <div class="col-span-2" v-if="customer.type === 'company'">
@@ -47,7 +47,7 @@
           <input type="text" id="email" v-model="customer.invoice_email" class="input !mt-0" autocomplete="new-password" placeholder="Fakturerings e-mail" />
         </div>
         <div :class="customer.type === 'company' ? 'col-span-2' : 'col-span-3'">
-          <label class="text-gray-600 text-[13px]">Telefon</label>
+          <label class="text-gray-600 text-[13px]">Telefon <span class="text-red-500">*</span></label>
           <input type="text" id="phone" v-model="customer.phone" class="input !mt-0" autocomplete="new-password" placeholder="Telefon" />
         </div>
         <div class="col-span-2">
@@ -135,7 +135,7 @@ onBeforeMount(() => {
     customer.value.customer_number = props.lastCustomerNumber;
     customer.value.type = 'company';
     customer.value.country = 'Danmark';
-    customer.value.color = taskColors[0];
+    customer.value.color = taskColors[5];
     customer.value.economic_create = true;
   } else {
     customer.value.customer_number = customer.value.number;
@@ -146,8 +146,13 @@ onBeforeMount(() => {
  * Methods
  ******************************/
 const saveCustomer = async () => {
-  if (!customer.value.name || !customer.value.customer_number || !customer.value.type) {
+  if (!customer.value.name || !customer.value.customer_number || !customer.value.type || !customer.value.phone || !customer.value.email) {
     message.showError('Du skal udfylde alle felter');
+    return;
+  }
+
+  if (customer.value.type === 'company' && !customer.value.cvr) {
+    message.showError('Du skal udfylde CVR nummer');
     return;
   }
 
@@ -198,5 +203,13 @@ const updateFromEconomicCustomer = (cc) => {
 
 const removeActiveEconomicCustomer = () => {
   customer.value.economic_id = null;
+}
+
+const changeCustomerColorType = () => {
+  if (customer.value.type === 'person') {
+    customer.value.color = taskColors[0];
+  } else {
+    customer.value.color = taskColors[5];
+  }
 }
 </script>
