@@ -1,8 +1,6 @@
 import { defineStore } from 'pinia';
-import moment from 'moment';
-import { ref, onBeforeMount } from "vue";
+import { ref } from "vue";
 import { axiosClient } from '@/lib/axiosClient';
-import { Message } from '@/store/message';
 
 export const Company = defineStore('company', () => {
   const customers = ref([]);
@@ -10,11 +8,33 @@ export const Company = defineStore('company', () => {
   const employees = ref([]);
   const products = ref([]);
   const areas = ref([]);
+  const companies = ref([]);
+  const activeCompany = ref({});
   const loading = ref({
     customers: true,
     employees: true,
-    products: true
+    products: true,
+    companies: true,
+    areas: true
   });
+
+  async function getCompanies() {
+    await axiosClient.get('company').then((response) => {
+      if (response?.companies) {
+        companies.value = response.companies;
+      }
+
+      if (response?.owner && response?.companies?.length > 0) {
+        companies.value.unshift({ id: response.owner.id, name: response.owner.name, cvr: response.owner.cvr });
+      }
+
+      if (response?.active) {
+        activeCompany.value = response.active;
+      }
+    }).catch((e) => { });
+
+    loading.value.companies = false;
+  }
 
   async function getCustomers() {
     await axiosClient.get('customers?per_page=100000').then((response) => {
@@ -45,9 +65,12 @@ export const Company = defineStore('company', () => {
     await axiosClient.get('settings?type=areas').then((response) => {
       areas.value = response.settings.find(s => s.key === 'areas')?.value || [];
     }).catch((e) => { });
+
+    loading.value.areas = false;
   }
 
   async function init() {
+    await getCompanies();
     await getCustomers();
     await getEmployees();
     await getProducts();
@@ -58,5 +81,5 @@ export const Company = defineStore('company', () => {
     lastCustomerNumber.value += 1;
   }
 
-  return { customers, lastCustomerNumber, employees, products, areas, loading, init, addToLastCustomerNumber, getCustomers, getEmployees, getProducts, getAreas }
+  return { customers, lastCustomerNumber, employees, products, areas, loading, init, addToLastCustomerNumber, getCustomers, getEmployees, getProducts, getAreas, companies, activeCompany }
 });

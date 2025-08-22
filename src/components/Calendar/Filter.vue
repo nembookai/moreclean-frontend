@@ -38,7 +38,8 @@
         </div>
         <div>
           <div class="text-[13px] font-light">Søg efter område</div>
-          <DropdownWrite fillPlaceholder="Vælg område" :values="areasDropdown" :chosenValue="filteredAreas" @selectValue="selectArea" display="name" dropdownWidth="w-[350px]" :filterable="['name']" />
+          <DropdownWrite v-if="!company.loading?.areas" fillPlaceholder="Vælg område" :values="areasDropdown" :chosenValue="filteredAreas" @selectValue="selectArea" display="name" dropdownWidth="w-[350px]" :filterable="['name']" />
+          <div v-if="company.loading?.areas" class="flex items-center gap-x-1 select-none"><PhSpinner :size="16" weight="bold" class="animate-spin" /> Indlæser områder...</div>
           <div class="mt-2" v-if="filteredAreas.length">
             <div class="text-gray-500 text-[12px] font-light">Områder valgt</div>
             <div class="flex flex-col gap-1.5">
@@ -64,7 +65,7 @@
 import { ref, computed } from 'vue';
 import { Company } from '@/store/company';
 import { Tasks } from '@/store/tasks';
-import { PhX } from '@phosphor-icons/vue';
+import { PhX, PhSpinner } from '@phosphor-icons/vue';
 
 /******************************
  * Refs & consts

@@ -4,6 +4,7 @@
   </template>
   <template v-else>
     <Layout-Loading v-if="loading.loading"/>
+    <Layout-TopBar />
     <ModalShow :condition="tasks.activeTask">
       <Task-Active @close="tasks.activeTask = null" />
     </ModalShow>
