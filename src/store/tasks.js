@@ -4,6 +4,7 @@ import { ref, computed } from "vue";
 import { Calendar } from '@/store/calendar';
 import { axiosClient } from '@/lib/axiosClient';
 import { Message } from '@/store/message';
+import { Loading } from '@/store/loading';
 
 export const Tasks = defineStore('tasks', () => {
   const calendar = Calendar();
@@ -11,8 +12,10 @@ export const Tasks = defineStore('tasks', () => {
   const tasks = ref([]);
   const showTaskCreation = ref(false);
   const activeTask = ref(null);
+  const loading = Loading();
   const prefillTask = ref({});
   const draggingTaskId = ref(null);
+  const highestYear = ref(moment().year());
   const activeFilter = ref({
     customers: [],
     employees: [],
@@ -24,6 +27,21 @@ export const Tasks = defineStore('tasks', () => {
     await axiosClient.get('task').then((response) => {
       tasks.value = response.tasks;
     }).catch((error) => { });
+  }
+
+  async function loadNewYear(date) {    
+    if (moment(date).year() <= highestYear.value) {
+      return;
+    }
+
+    loading.load('Henter data');
+
+    await axiosClient.get(`task?year=${moment(date).year()}`).then((response) => {
+      tasks.value = response.tasks;
+      highestYear.value = moment(date).year();
+    }).catch((error) => { });
+
+    loading.reset();
   }
 
   function groupedTasks(day) {
@@ -254,5 +272,5 @@ export const Tasks = defineStore('tasks', () => {
     return result;
   });
   
-  return { tasks, groupedTasks, tasksListView, showTaskCreation, addTask, activeTask, deleteTask, updateTask, createFromDate, prefillTask, handleDrop, draggingTaskId, updateTaskBackend, setActiveTask, filteredTasks, activeFilter, init }
+  return { tasks, groupedTasks, tasksListView, showTaskCreation, addTask, activeTask, deleteTask, updateTask, createFromDate, prefillTask, handleDrop, draggingTaskId, updateTaskBackend, setActiveTask, filteredTasks, activeFilter, init, loadNewYear }
 });

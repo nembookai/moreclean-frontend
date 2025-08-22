@@ -33,6 +33,7 @@ const loading = Loading();
  * Methods
 ******************************/
 function viewChanged() {  
+  tasks.loadNewYear(calendar.activeDate);
   scrollToCenter();
 }
 
