@@ -9,6 +9,14 @@
     <DeletePrompt :msg="`Er du sikker på du vil slette ${activeEmployee.name}?`" @delete="deleteEmployee" @close="deleteSure = null" />
   </ModalShow>
 
+  <ModalShow :condition="createUserLogin">
+    <Employee-CreateUserLogin :employee="createUserLogin" @close="createUserLogin = null" @addUserLogin="addUserLogin" />
+  </ModalShow>
+
+  <ModalShow :condition="deleteUserSure">
+    <DeletePrompt :msg="`Er du sikker på du vil fjerne login for ${deleteUserSure?.name}?`" @delete="deleteUserLogin" @close="deleteUserSure = null" />
+  </ModalShow>
+
   <div class="mt-5 box" v-if="!loading.loading">
     <TableComponent emptyMessage="Ingen medarbejdere fundet" :lastRight="true" :headers="headers" :data="employeeData">
       <template #extra>
@@ -41,6 +49,16 @@
           <div class="text-[10px] text-gray-600" v-if="employee.zip || employee.city">
             <span v-if="employee.zip">{{ employee.zip }}, </span>
             <span v-if="employee.city">{{ employee.city }}</span>
+          </div>
+        </td>
+        <td>
+          <div v-if="employee.user" class="flex items-center gap-x-2">
+            <div class="underline text-blue-600 cursor-pointer hover-transition hover:text-blue-700 active:text-blue-800" @click="createUserLogin = employee">{{ employee.user?.email }}</div>
+            <PhBackspace :size="16" weight="fill" class="text-red-600 cursor-pointer hover-transition hover:text-red-700 active:text-red-800" @click="deleteUserSure = employee" />
+          </div>
+          <div class="underline text-blue-600 flex items-center gap-x-2 cursor-pointer hover-transition hover:text-blue-700 active:text-blue-800" v-else @click="createUserLogin = employee">
+            <PhUserPlus :size="16" />
+            Tilknyt login
           </div>
         </td>
         <td>
@@ -78,7 +96,7 @@
 ******************************/
 import { ref, onBeforeMount, inject } from 'vue';
 import { axiosClient } from '@/lib/axiosClient'
-import { PhCaretDown, PhPen, PhBackspace, PhPlus, PhEye } from '@phosphor-icons/vue';
+import { PhCaretDown, PhPen, PhBackspace, PhPlus, PhEye, PhUserPlus } from '@phosphor-icons/vue';
 import { formatPrice } from '@/composables/Price';
 import { useRouter } from 'vue-router';
 
@@ -88,6 +106,8 @@ import { useRouter } from 'vue-router';
 const message = inject('message');
 const loading = inject('loading');
 const router = useRouter();
+const createUserLogin = ref(null);
+const deleteUserSure = ref(null);
 const employeeData = ref([]);
 const headers = [
   {
@@ -103,6 +123,9 @@ const headers = [
   },
   {
     name: 'Adresse'
+  },
+  {
+    name: 'Tilknyttet til'
   },
   {
     name: ''
@@ -155,6 +178,27 @@ const deleteEmployee = async () => {
     }
     deleteSure.value = null;
     message.showComplete('Medarbejderen er blevet slettet');
+  }).catch((e) => { });
+};
+
+const addUserLogin = (user) => {
+  const index = employeeData.value.data.findIndex(p => p.id === createUserLogin.value.id);
+  employeeData.value.data[index].user = user;
+  createUserLogin.value = null;
+};
+
+const deleteUserLogin = async () => {
+  let id = deleteUserSure?.value?.user?.id;
+
+  if (!id) return;
+
+  await axiosClient.delete(`employees/user/${id}`).then(() => {
+    const index = employeeData.value.data.findIndex(p => p.id === deleteUserSure.value.id);
+    if (index !== -1) {
+      employeeData.value.data[index].user = null;
+    }
+    message.showComplete('Login fjernet');
+    deleteUserSure.value = null;
   }).catch((e) => { });
 };
 </script>
