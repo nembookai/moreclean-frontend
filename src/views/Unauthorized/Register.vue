@@ -3,7 +3,7 @@
     <div class="relative sm:flex sm:justify-center sm:items-center min-h-screen">
       <div class="w-10/12 sm:w-[450px]">
         <div class="mt-10 sm:mt-0 flex items-end justify-between">
-          <img class="w-[120px]" src="img/brand/moreclean_logo.png" alt="logo" />
+          <img class="w-[120px]" src="img/brand/nembookingai_logo.png" alt="logo" />
           <div class="text-[25px] font-semibold text-gray-700">Tilmeld dig</div>
         </div>
         <div class="px-6 py-4 bg-white from-gray-700/50 via-transparent rounded-lg mt-2 shadow-2xl shadow-gray-500/20">

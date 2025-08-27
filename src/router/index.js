@@ -12,7 +12,7 @@ const routes = [
   ...customerRoutes,
   ...employeeViewRoutes,
   ...employeesRoutes,
-  { path: '/:pathMatch(.*)*', name: 'notFound', component: () => import('../views/NotFoundView.vue'), meta: { title: 'Siden findes ikke - MoreClean' } },
+  { path: '/:pathMatch(.*)*', name: 'notFound', component: () => import('../views/NotFoundView.vue'), meta: { title: 'Siden findes ikke - Nembookingai' } },
 ]
 
 const router = createRouter({

@@ -1,7 +1,7 @@
 <template>
   <div class="top-0 bottom-0 bg-white border-r-2 border-gray-200 items-center justify-between flex flex-col h-full shadow-lg pt-4 hover-transition fixed z-[999]" :class="hideMenu ? 'w-[215px]' : 'w-[85px]'">
     <div class="items-center flex flex-col">
-      <RouterLink to="/"><img src="@/assets/images/brand/moreclean_icon.png" class="rounded-md h-[35px] object-contain w-[35px] drop-shadow-sm" /></RouterLink>
+      <RouterLink to="/"><img src="@/assets/images/brand/nembookingai_icon.png" class="rounded-md h-[35px] object-contain w-[35px] drop-shadow-sm" /></RouterLink>
       <div class="flex flex-col justify-center items-center mt-[25px] gap-y-3">
         <RouterLink v-for="item in menuItems" :key="item.route" :to="{ name: item.route }" class="flex relative p-[7.5px] text-gray-700 flex-col group justify-center items-center rounded-[6px]" active-class="!text-primary-500 shadow-lg border border-gray-50" v-slot="{ isActive }">
           <component

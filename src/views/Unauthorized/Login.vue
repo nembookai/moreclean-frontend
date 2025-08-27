@@ -8,7 +8,7 @@
           </div>
         </div>
         <div class="md:px-[50px] h-full flex flex-col justify-center">
-          <img src="img/brand/moreclean_logo.png" class="w-[200px] mb-5" />
+          <img src="img/brand/nembookingai_logo.png" class="w-[200px] mb-5" />
           <div class="text-[20px] font-semibold text-gray-700 mb-1">Log ind</div>
           <form @submit.prevent="login">
             <div class="text-gray-700 text-[14.5px]">E-mail adresse</div>
