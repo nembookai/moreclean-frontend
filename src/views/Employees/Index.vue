@@ -2,7 +2,7 @@
   <LayoutComponents-Title title="Medarbejdere" />
 
   <ModalShow :condition="openCreateEmployee">
-    <Employee-Create @close="openCreateEmployee = false" :prefill="activeEmployee" @updated="updateEmployee" @created="createEmployee" />
+    <Employees-Create @close="openCreateEmployee = false" :prefill="activeEmployee" @updated="updateEmployee" @created="createEmployee" />
   </ModalShow>
 
   <ModalShow :condition="deleteSure">
@@ -10,7 +10,7 @@
   </ModalShow>
 
   <ModalShow :condition="createUserLogin">
-    <Employee-CreateUserLogin :employee="createUserLogin" @close="createUserLogin = null" @addUserLogin="addUserLogin" />
+    <Employees-CreateUserLogin :employee="createUserLogin" @close="createUserLogin = null" @addUserLogin="addUserLogin" />
   </ModalShow>
 
   <ModalShow :condition="deleteUserSure">

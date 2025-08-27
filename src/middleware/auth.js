@@ -17,8 +17,12 @@ export default (requiredRole = null) => {
         }
       });
   
-      if (!requiredRole.includes(userRole) && userRole !== 'admin') {
-        return { name: 'dashboard' };
+      if (!requiredRole.includes(userRole)) {
+        if (userRole === 'employee') {
+          return { name: 'employee.dashboard' };
+        }
+        
+        return { name: 'notFound' };
       }
     }
 

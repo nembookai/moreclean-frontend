@@ -51,7 +51,9 @@ axiosClient.interceptors.response.use(
     }
 
     if (error?.response?.data?.force_dashboard && error?.status === 401) {
-      window.location.href = '/not-found';
+      if (window.location.pathname !== '/not-found') {
+        window.location.href = '/not-found';
+      }
     }
 
     if (error.status === 429) {

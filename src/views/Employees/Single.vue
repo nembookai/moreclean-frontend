@@ -3,7 +3,7 @@
     <LayoutComponents-Title :title="`Medarbejder ${employee?.name || '---'}`" />
 
     <ModalShow :condition="openEditEmployee">
-      <Employee-Create @close="openEditEmployee = false" :prefill="employee" @updated="updateEmployee" />
+      <Employees-Create @close="openEditEmployee = false" :prefill="employee" @updated="updateEmployee" />
     </ModalShow>
 
     <ModalShow :condition="openDeleteSure">

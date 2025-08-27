@@ -541,7 +541,7 @@ export function textColorWhiteOrBlack(color) {
   const brightness = (0.299 * r + 0.587 * g + 0.114 * b);
 
   // Return the appropriate class based on brightness
-  return brightness > 128 ? "text-black" : "text-white";
+  return brightness > 145 ? "text-black" : "text-white";
 };
 
 export const times = Array.from({ length: 96 }, (_, i) => {

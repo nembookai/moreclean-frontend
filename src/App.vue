@@ -4,15 +4,19 @@
   </template>
   <template v-else>
     <Layout-Loading v-if="loading.loading"/>
-    <Layout-TopBar />
-    <ModalShow :condition="tasks.activeTask">
-      <Task-Active @close="tasks.activeTask = null" />
-    </ModalShow>
-    <ModalShow :condition="mail.showActiveMail">
-      <MailSender :title="mail.activeMail.subject" :body="mail.activeMail.body" :allRecipients="mail.activeMail.recipients" @close="mail.closeActiveMail()" />
-    </ModalShow>
-    <Layout-SideNavigation @hide="hide" />
-    <div class="hover-transition" :class="menuIsHidden ? 'content' : 'bigger-content'">
+
+    <template v-if="auth.userRole === 'owner'">
+      <Layout-TopBar />
+      <ModalShow :condition="tasks.activeTask">
+        <Task-Active @close="tasks.activeTask = null" />
+      </ModalShow>
+      <ModalShow :condition="mail.showActiveMail">
+        <MailSender :title="mail.activeMail.subject" :body="mail.activeMail.body" :allRecipients="mail.activeMail.recipients" @close="mail.closeActiveMail()" />
+      </ModalShow>
+      <Layout-SideNavigation @hide="hide" />
+    </template>
+    
+    <div class="hover-transition" :class="auth.userRole === 'owner' ? (menuIsHidden ? 'content' : 'bigger-content') : 'normal-content'">
       <router-view :key="$route.fullPath" />
     </div>
   </template>
@@ -57,8 +61,15 @@ provide('urlSavings', urlSavings.value)
 onBeforeMount(async () => {
   loading.load('Henter data');
 
-  await company.init();
-  await tasks.init();
+  if (auth.user) {
+    await auth.getUserRole();
+    await auth.getUser();
+  }
+
+  if (auth.userRole === 'owner') {
+    await company.init();
+    await tasks.init();
+  }
   
   loading.reset();
 });
@@ -66,14 +77,6 @@ onBeforeMount(async () => {
 /******************************
  * Methods and functions
 ******************************/
-const reload = () => {
-  if (auth.user) {
-    auth.getUserRole();
-    auth.getUser();
-  }
-}
-reload();
-
 const hide = () => {
   menuIsHidden.value = !menuIsHidden.value;
 }

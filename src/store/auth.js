@@ -14,6 +14,11 @@ export const Auth = defineStore('auth', {
       window.localStorage.setItem('user', JSON.stringify(user));
       this.token = token;
       this.user = user;
+
+      if (user.role === 'employee') {
+        return window.location.href = '/employee/dashboard';
+      }
+
       window.location.href = '/dashboard';
     },
     logout() {
@@ -24,8 +29,8 @@ export const Auth = defineStore('auth', {
       this.userRole = null;
       window.location.href = '/login';
     },
-    getUserRole() {
-      axiosClient.get('user/role').then((response) => {
+    async getUserRole() {
+      await axiosClient.get('user/role').then((response) => {
         if (response.role) {
           this.userRole = response.role;
         }
@@ -34,8 +39,8 @@ export const Auth = defineStore('auth', {
     check() {
       return !!this.token;
     },
-    getUser() {
-      axiosClient.get('user').then((response) => {
+    async getUser() {
+      await axiosClient.get('user').then((response) => {
         this.user = response.user;
         window.localStorage.setItem('user', JSON.stringify(this.user));
       }).catch((e) => { });
