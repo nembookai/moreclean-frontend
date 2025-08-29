@@ -42,6 +42,8 @@
             <div class="col-span-8">({{ task.start_time }} - {{ task.end_time }}) {{ moment(task.date).format('DD. MMMM YYYY') }}</div>
             <div class="col-span-4 font-semibold" v-if="task.description">Noter:</div>
             <div class="col-span-8" v-if="task.description">{{ task.description }}</div>
+            <div class="col-span-4 font-semibold">Varighed:</div>
+            <div class="col-span-8">{{ formatPrice(task?.economy?.invoice_hours_employee) + ' timer' }}</div>
             <div class="col-span-full flex items-center gap-x-3 mt-3">
               <div class="w-[40px] h-[40px] rounded-full flex items-center justify-center cursor-pointer" :class="textColorWhiteOrBlack(task.color) === 'text-white' ? 'bg-white' : 'bg-gray-800'" @click.stop="showTaskInfo(task)">
                 <PhInfo :size="30" weight="regular" :class="textColorWhiteOrBlack(task.color) === 'text-white' ? 'text-gray-800' : 'text-white'" />

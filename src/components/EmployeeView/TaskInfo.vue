@@ -46,7 +46,7 @@
             </div>
             <div>
               <div class="text-sm text-gray-600 font-light">Varighed</div>
-              <div class="font-light text-gray-700">{{ durationText }}</div>
+              <div class="font-light text-gray-700">{{ (formatPrice(task?.economy?.invoice_hours_employee) + ' timer') || '---' }}</div>
             </div>
             <div class="md:col-span-3">
               <div class="text-sm text-gray-600 font-light">Beskrivelse</div>
@@ -129,23 +129,10 @@
 import moment from 'moment';
 import { computed } from 'vue';
 import { PhUser, PhAlignLeftSimple, PhMapPin, PhCheck, PhX, PhCalendar, PhClock, PhListBullets, PhUsers, PhInfo } from '@phosphor-icons/vue';
+import { formatPrice } from '@/composables/Price';
 
 const props = defineProps(['task']);
 const emit = defineEmits(['close']);
 
 const customer = computed(() => props.task?.customer || {});
-
-const durationText = computed(() => {
-  const start = props.task?.start_time;
-  const end = props.task?.end_time;
-  if (!start || !end) return '---';
-  const startMoment = moment(start, 'HH:mm');
-  const endMoment = moment(end, 'HH:mm');
-  const minutes = endMoment.diff(startMoment, 'minutes');
-  if (!minutes || minutes < 0) return '---';
-  if (minutes < 60) return `${minutes} min`;
-  const hrs = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  return mins ? `${hrs} t ${mins} min` : `${hrs} t`;
-});
 </script>
